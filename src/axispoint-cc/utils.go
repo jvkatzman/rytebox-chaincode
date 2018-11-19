@@ -11,20 +11,22 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 ////////////////////////////////////////////////////////////////////////////
 // Update the Object - Replace current data with replacement
 // Register users into this table
 ////////////////////////////////////////////////////////////////////////////
-func UpdateObject(stub shim.ChaincodeStubInterface, objectType string, keys []string, objectData []byte) error {
+func updateObject(stub shim.ChaincodeStubInterface, objectType string, keys []string, objectData []byte) error {
 	// Check number of keys
-	err := VerifyAtLeastOneKeyIsPresent(keys)
+	err := verifyAtLeastOneKeyIsPresent(keys)
 	if err != nil {
 		return err
 	}
@@ -47,9 +49,9 @@ func UpdateObject(stub shim.ChaincodeStubInterface, objectType string, keys []st
 // Retrieve the object based on the key and simply delete it
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-func DeleteObject(stub shim.ChaincodeStubInterface, objectType string, keys []string) error {
+func deleteObject(stub shim.ChaincodeStubInterface, objectType string, keys []string) error {
 	// Check number of keys
-	err := VerifyAtLeastOneKeyIsPresent(keys)
+	err := verifyAtLeastOneKeyIsPresent(keys)
 	if err != nil {
 		return err
 	}
@@ -72,7 +74,7 @@ func DeleteObject(stub shim.ChaincodeStubInterface, objectType string, keys []st
 // Delete all objects of ObjectType
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-func DeleteAllObjects(stub shim.ChaincodeStubInterface, objectType string) error {
+func deleteAllObjects(stub shim.ChaincodeStubInterface, objectType string) error {
 	// Convert keys to  compound key
 	compositeKey, _ := stub.CreateCompositeKey(objectType, []string{""})
 
@@ -92,9 +94,9 @@ func DeleteAllObjects(stub shim.ChaincodeStubInterface, objectType string) error
 // The existing object is simply queried and the data contents is replaced with
 // new content
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-func ReplaceObject(stub shim.ChaincodeStubInterface, objectType string, keys []string, objectData []byte) error {
+func replaceObject(stub shim.ChaincodeStubInterface, objectType string, keys []string, objectData []byte) error {
 	// Check number of keys
-	err := VerifyAtLeastOneKeyIsPresent(keys)
+	err := verifyAtLeastOneKeyIsPresent(keys)
 	if err != nil {
 		return err
 	}
@@ -117,9 +119,9 @@ func ReplaceObject(stub shim.ChaincodeStubInterface, objectType string, keys []s
 // Query a User Object by Object Name and Key
 // This has to be a full key and should return only one unique object
 ////////////////////////////////////////////////////////////////////////////
-func QueryObject(stub shim.ChaincodeStubInterface, objectType string, keys []string) ([]byte, error) {
+func queryObject(stub shim.ChaincodeStubInterface, objectType string, keys []string) ([]byte, error) {
 	// Check number of keys
-	err := VerifyAtLeastOneKeyIsPresent(keys)
+	err := verifyAtLeastOneKeyIsPresent(keys)
 	if err != nil {
 		return nil, err
 	}
@@ -139,9 +141,9 @@ func QueryObject(stub shim.ChaincodeStubInterface, objectType string, keys []str
 // Query a User Object by Object Name and Key
 // This has to be a full key and should return only one unique object
 ////////////////////////////////////////////////////////////////////////////
-func QueryObjectWithProcessingFunction(stub shim.ChaincodeStubInterface, objectType string, keys []string, fname func(shim.ChaincodeStubInterface, []byte, []string) error) ([]byte, error) {
+func queryObjectWithProcessingFunction(stub shim.ChaincodeStubInterface, objectType string, keys []string, fname func(shim.ChaincodeStubInterface, []byte, []string) error) ([]byte, error) {
 	// Check number of keys
-	err := VerifyAtLeastOneKeyIsPresent(keys)
+	err := verifyAtLeastOneKeyIsPresent(keys)
 	if err != nil {
 		return nil, err
 	}
@@ -174,13 +176,13 @@ func QueryObjectWithProcessingFunction(stub shim.ChaincodeStubInterface, objectT
 // Get a List of Rows based on query criteria from the OBC
 // The getList Function
 ////////////////////////////////////////////////////////////////////////////
-func GetKeyList(stub shim.ChaincodeStubInterface, args []string) (shim.StateQueryIteratorInterface, error) {
+func getKeyList(stub shim.ChaincodeStubInterface, args []string) (shim.StateQueryIteratorInterface, error) {
 	// Define partial key to query within objects namespace (objectType)
 	objectType := args[0]
 
 	// Check number of keys
 
-	err := VerifyAtLeastOneKeyIsPresent(args[1:])
+	err := verifyAtLeastOneKeyIsPresent(args[1:])
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +214,7 @@ func GetKeyList(stub shim.ChaincodeStubInterface, args []string) (shim.StateQuer
 // GetQueryResultForQueryString executes the passed in query string.
 // Result set is built and returned as a byte array containing the JSON results.
 ///////////////////////////////////////////////////////////////////////////////////////////
-func GetQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]byte, error) {
+func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]byte, error) {
 	fmt.Printf("GetQueryResultForQueryString() : getQueryResultForQueryString queryString:\n%s\n", queryString)
 
 	resultsIterator, err := stub.GetQueryResult(queryString)
@@ -248,9 +250,9 @@ func GetQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 	return buffer.Bytes(), nil
 }
 
-func GetList(stub shim.ChaincodeStubInterface, objectType string, keys []string) (shim.StateQueryIteratorInterface, error) {
+func getList(stub shim.ChaincodeStubInterface, objectType string, keys []string) (shim.StateQueryIteratorInterface, error) {
 	// Check number of keys
-	err := VerifyAtLeastOneKeyIsPresent(keys)
+	err := verifyAtLeastOneKeyIsPresent(keys)
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +274,7 @@ func GetList(stub shim.ChaincodeStubInterface, objectType string, keys []string)
 // < the max keys defined for the Object
 ////////////////////////////////////////////////////////////////////////////
 
-func VerifyAtLeastOneKeyIsPresent(args []string) error {
+func verifyAtLeastOneKeyIsPresent(args []string) error {
 	// Check number of keys
 	nKeys := len(args)
 	if nKeys == 1 {
@@ -280,10 +282,100 @@ func VerifyAtLeastOneKeyIsPresent(args []string) error {
 	}
 
 	if nKeys < 1 {
-		err := fmt.Sprintf("VerifyAtLeastOneKeyIsPresent() Failed: Atleast 1 Key must is needed :  nKeys : %s", strconv.Itoa(nKeys))
+		err := fmt.Sprintf("verifyAtLeastOneKeyIsPresent() Failed: Atleast 1 Key must is needed :  nKeys : %s", strconv.Itoa(nKeys))
 		fmt.Println(err)
 		return errors.New(err)
 	}
 
 	return nil
+}
+
+// jsonToObject - common function for unmarshalls : jsonToObject function unmarshalls a JSON into an object
+// ================================================================================
+func jsonToObject(data []byte, object interface{}) error {
+	if err := json.Unmarshal([]byte(data), object); err != nil {
+		logger.Errorf("Unmarshal failed : %s ", err.Error())
+		return err
+	}
+	return nil
+}
+
+// objectToJSON - common function for marshalls : objectToJSON function marshalls an object into a JSON
+// ================================================================================
+func objectToJSON(object interface{}) ([]byte, error) {
+	var byteArray []byte
+	var err error
+
+	if byteArray, err = json.Marshal(object); err != nil {
+		logger.Errorf("Marshal failed : %s ", err.Error())
+		return nil, err
+	}
+
+	if len(byteArray) == 0 {
+		return nil, fmt.Errorf(("failed to convert object"))
+	}
+	return byteArray, nil
+}
+
+// getSuccessResponse - Create Success Response and return back to the calling application
+// ================================================================================
+func getSuccessResponse(message string) pb.Response {
+	objResponse := Response{Status: "200", Message: message}
+	logger.Info("getSuccessResponse: Called For: ", objResponse)
+	response, err := json.Marshal(objResponse)
+	if err != nil {
+		logger.Errorf(fmt.Sprintf("Invalid function %s", err))
+	}
+	return shim.Success(response)
+}
+
+// getErrorResponse - Create Error Response and return back to the calling application
+// ================================================================================
+func getErrorResponse(message string) pb.Response {
+	objResponse := Response{Status: "500", Message: message}
+	logger.Info("getErrorResponse: Called For: ", objResponse)
+	response, err := json.Marshal(objResponse)
+	if err != nil {
+		logger.Errorf(fmt.Sprintf("Invalid function %s", err))
+	}
+	return shim.Success(response)
+}
+
+// getHistory - Get History of an asset
+// ================================================================================
+func getHistory(stub shim.ChaincodeStubInterface, objectType string, args []string) pb.Response {
+	var history []AuditHistory
+
+	if len(args) < 1 {
+		return shim.Error("Incorrect number of arguments. Expecting one or more keys")
+	}
+
+	Key, _ := stub.CreateCompositeKey(objectType, args)
+	fmt.Printf("- start getHistory: %s\n", Key)
+
+	// Get History
+	resultsIterator, err := stub.GetHistoryForKey(Key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+
+	for resultsIterator.HasNext() {
+		historyData, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		var tx AuditHistory
+		tx.TxID = historyData.TxId
+		tx.Value = string(historyData.Value)
+		tx.TimeStamp = historyData.GetTimestamp().String()
+
+		history = append(history, tx) //add this tx to the list
+	}
+	fmt.Printf("- getHistory returning:\n%s", history)
+
+	//change to array of bytes
+	historyAsBytes, _ := json.Marshal(history) //convert to array of bytes
+	return shim.Success(historyAsBytes)
 }

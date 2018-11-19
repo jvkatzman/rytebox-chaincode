@@ -29,13 +29,6 @@ type AxispointChaincode struct {
 	funcMap  map[string]InvokeFunc
 }
 
-// AuditHistory struct
-type AuditHistory struct {
-	TxID      string `json:"txId"`
-	Value     string `json:"value"`
-	TimeStamp string `json:"timeStamp"`
-}
-
 var logger = shim.NewLogger("axispoint-cc")
 
 type InvokeFunc func(stub shim.ChaincodeStubInterface, args []string) pb.Response
@@ -45,7 +38,8 @@ type InvokeFunc func(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 func (t *AxispointChaincode) initFunctionMaps() {
 	t.tableMap = make(map[string]int)
 	t.funcMap = make(map[string]InvokeFunc)
-	t.funcMap["CreateRoyaltyReport"] = CreateRoyaltyReport
+	t.funcMap["AddRoyaltyReports"] = AddRoyaltyReports
+	t.funcMap["AddExploitationReports"] = AddExploitationReports
 }
 
 // Init - intialize chaincode
@@ -81,6 +75,6 @@ var isInit = false
 func main() {
 	err := shim.Start(new(AxispointChaincode))
 	if err != nil {
-		fmt.Printf("Error starting Bluegill chaincode: %s", err)
+		fmt.Printf("Error starting Axispoint chaincode: %s", err)
 	}
 }

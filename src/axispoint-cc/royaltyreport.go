@@ -21,15 +21,14 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-type RoyaltyReport struct {
-	DocType         string `json:"docType"`
-	RoyaltyReportID string `json:"royaltyReportID"`
-}
-
-//CreateRoyaltyReport : Record an royaltyReport
-func CreateRoyaltyReport(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-
-	var Avalbytes []byte
+//AddRoyaltyReports function contains business logic to insert new
+// Royalty Reports to the Ledger
+/*
+* @params   {Array} args
+* @property {string} 0       - stringified JSON array of exploitation report.
+* @return   {pb.Response}    - peer Response
+ */
+func AddRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	type RoyaltyReportResponse struct {
 		RoyaltyReport RoyaltyReport `json:"royaltyReport"`
 		Message       string        `json:"message"`
@@ -43,35 +42,35 @@ func CreateRoyaltyReport(stub shim.ChaincodeStubInterface, args []string) pb.Res
 	royaltyReports := &[]RoyaltyReport{}
 	royaltyReportResponses := []RoyaltyReportResponse{}
 
-	_ = jsonToObject([]byte(args[0]), royaltyReports)
+	err := jsonToObject([]byte(args[0]), royaltyReports)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
 
+	// Iterate over Royalty Reports
 	for _, royaltyReport := range *royaltyReports {
 		royaltyReport.DocType = ROYALTYREPORT
-		keys := []string{royaltyReport.RoyaltyReportID}
 		royaltyReportResponse := RoyaltyReportResponse{}
 		royaltyReportResponse.RoyaltyReport = royaltyReport
 		royaltyReportResponse.Success = true
 
-		//Check if royaltyReport already exists
-		objBytes, err := QueryObject(stub, ROYALTYREPORT, keys)
+		//Record royaltyReport on ledger
+		royaltyReportBytes, err := objectToJSON(royaltyReport)
+		if err != nil {
+			royaltyReportResponse.Success = false
+			royaltyReportResponse.Message = err.Error()
+			continue
+		}
+
+		err = stub.PutState(royaltyReport.RoyaltyReportUUID, royaltyReportBytes)
 		if err != nil {
 			royaltyReportResponse.Success = false
 			royaltyReportResponse.Message = err.Error()
 		}
-		if royaltyReportResponse.Success && objBytes != nil {
-			royaltyReportResponse.Success = false
-			royaltyReportResponse.Message = "Royalty Report with Royalty Report ID : " + royaltyReport.RoyaltyReportID + " already exists"
-		} else {
-			//Record royaltyReport on ledger
-			Avalbytes, _ = objectToJSON(royaltyReport)
-			err = UpdateObject(stub, ROYALTYREPORT, keys, Avalbytes)
-			if err != nil {
-				royaltyReportResponse.Success = false
-				royaltyReportResponse.Message = err.Error()
-			}
-		}
+
 		royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
 	}
+
 	objBytes, _ := objectToJSON(royaltyReportResponses)
 	return shim.Success(objBytes)
 }
