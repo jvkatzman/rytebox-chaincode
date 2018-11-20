@@ -38,8 +38,8 @@ type InvokeFunc func(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 func (t *AxispointChaincode) initFunctionMaps() {
 	t.tableMap = make(map[string]int)
 	t.funcMap = make(map[string]InvokeFunc)
-	t.funcMap["AddRoyaltyReports"] = AddRoyaltyReports
-	t.funcMap["AddExploitationReports"] = AddExploitationReports
+	t.funcMap["addRoyaltyReports"] = addRoyaltyReports
+	t.funcMap["addExploitationReports"] = addExploitationReports
 }
 
 // Init - intialize chaincode

@@ -17,22 +17,25 @@ limitations under the License.
 package main
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-//AddRoyaltyReports function contains business logic to insert new
-// Royalty Reports to the Ledger
-/*
-* @params   {Array} args
-* @property {string} 0       - stringified JSON array of exploitation report.
-* @return   {pb.Response}    - peer Response
- */
-func AddRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+// GetExploitationReportForQueryString function returns exploitation reports based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
+var getExploitationReportForQueryString = getObjectByQueryFromLedger
+
+//AddRoyaltyReports : Add Royalty Reports to the ledger
+func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "addRoyaltyReports"
+	logger.Info("ENTERING >", methodName)
+
 	type RoyaltyReportResponse struct {
-		RoyaltyReport RoyaltyReport `json:"royaltyReport"`
-		Message       string        `json:"message"`
-		Success       bool          `json:"success"`
+		RoyaltyReportUUID string `json:"royaltyReportUUID"`
+		Message           string `json:"message"`
+		Success           bool   `json:"success"`
 	}
 
 	if len(args) != 1 {
@@ -51,14 +54,25 @@ func AddRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 	for _, royaltyReport := range *royaltyReports {
 		royaltyReport.DocType = ROYALTYREPORT
 		royaltyReportResponse := RoyaltyReportResponse{}
-		royaltyReportResponse.RoyaltyReport = royaltyReport
+		royaltyReportResponse.RoyaltyReportUUID = royaltyReport.RoyaltyReportUUID
 		royaltyReportResponse.Success = true
+
+		exploitationReportUUID, err := getExploitationReportUUID(stub, royaltyReport)
+		if err != nil {
+			royaltyReportResponse.Success = false
+			royaltyReportResponse.Message = err.Error()
+			royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
+			continue
+		}
+
+		royaltyReport.ExploitationReportUUID = exploitationReportUUID
 
 		//Record royaltyReport on ledger
 		royaltyReportBytes, err := objectToJSON(royaltyReport)
 		if err != nil {
 			royaltyReportResponse.Success = false
 			royaltyReportResponse.Message = err.Error()
+			royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
 			continue
 		}
 
@@ -72,5 +86,37 @@ func AddRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 	}
 
 	objBytes, _ := objectToJSON(royaltyReportResponses)
+	logger.Info("EXITING <", methodName)
 	return shim.Success(objBytes)
+}
+
+//getExploitationReportUUID : Get the UUID of the exploitation report based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
+func getExploitationReportUUID(stub shim.ChaincodeStubInterface, royaltyReport RoyaltyReport) (string, error) {
+	var methodName = "getExploitationReportUUID"
+	logger.Info("ENTERING >", methodName)
+
+	exploitationReportUUID := ""
+	queryString := "{\"selector\":{\"docType\":\"" + EXPLOITATIONREPORT + "\",\"source\": \"" + royaltyReport.Source + "\",\"isrc\": \"" + royaltyReport.Isrc + "\",\"exploitationDate\": \"" + royaltyReport.ExploitationDate + "\",\"territory\": \"" + royaltyReport.Territory + "\"}}"
+	logger.Info(methodName, queryString)
+
+	queryResults, err := getExploitationReportForQueryString(stub, queryString)
+	if err != nil {
+		return exploitationReportUUID, err
+	}
+
+	var exploitationReports []ExploitationReport
+	err = sliceToStruct(queryResults, &exploitationReports)
+	if err != nil {
+		return exploitationReportUUID, err
+	}
+
+	if len(exploitationReports) <= 0 {
+		errorMessage := fmt.Sprintf("Cannot find Exploitation Report with Source: %s, ISRC: %s, Exploitation Date: %s, , Territory: %s", royaltyReport.Source, royaltyReport.Isrc, royaltyReport.ExploitationDate, royaltyReport.Territory)
+		return exploitationReportUUID, errors.New(errorMessage)
+	}
+
+	exploitationReportUUID = exploitationReports[0].ExploitationReportUUID
+
+	logger.Info("EXITING <", methodName, exploitationReportUUID)
+	return exploitationReportUUID, nil
 }

@@ -32,13 +32,17 @@ type ExploitationReport struct {
 
 //RoyaltyReport : struct defining data model for Royalty Reports
 type RoyaltyReport struct {
-	DocType           string `json:"docType"`
-	RoyaltyReportUUID string `json:"royaltyReportUUID"`
-}
-
-// AuditHistory : struct defining data model to get history of an asset
-type AuditHistory struct {
-	TxID      string `json:"txId"`
-	Value     string `json:"value"`
-	TimeStamp string `json:"timeStamp"`
+	DocType                string `json:"docType"`
+	RoyaltyReportUUID      string `json:"royaltyReportUUID"`
+	ExploitationReportUUID string `json:"exploitationReportUUID"`
+	Isrc                   string `json:"isrc"`
+	Source                 string `json:"source"`
+	ExploitationType       string `json:"exploitationType"`
+	Territory              string `json:"territory"`
+	ExploitationDate       string `json:"exploitationDate"`
+	RightType              string `json:"rightType"`
+	From                   string `json:"from"`
+	To                     string `json:"to"`
+	Amount                 string `json:"amount"`
+	PaymentType            string `json:"paymentType"`
 }
