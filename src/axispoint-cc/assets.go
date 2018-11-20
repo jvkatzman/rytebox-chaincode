@@ -35,14 +35,14 @@ type RoyaltyReport struct {
 	DocType                string `json:"docType"`
 	RoyaltyReportUUID      string `json:"royaltyReportUUID"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
-	Isrc                   string `json:"isrc"`
 	Source                 string `json:"source"`
+	Isrc                   string `json:"isrc"`
 	ExploitationType       string `json:"exploitationType"`
-	Territory              string `json:"territory"`
 	ExploitationDate       string `json:"exploitationDate"`
+	Amount                 string `json:"amount"`
 	RightType              string `json:"rightType"`
+	Territory              string `json:"territory"`
+	PaymentType            string `json:"paymentType"`
 	From                   string `json:"from"`
 	To                     string `json:"to"`
-	Amount                 string `json:"amount"`
-	PaymentType            string `json:"paymentType"`
 }

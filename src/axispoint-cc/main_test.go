@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -67,6 +68,30 @@ func checkQuery(t *testing.T, stub *shim.MockStub, args [][]byte, retval []byte)
 		t.FailNow()
 	}
 	fmt.Println("Query Result", " was: ", string(res.Payload))
+}
+
+func testInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) ([]byte, error) {
+	res := stub.MockInvoke("1", args)
+	if res.Status != shim.OK {
+		fmt.Println("Invoke", args, "failed", string(res.Message))
+		return nil, errors.New(res.Message)
+	}
+	fmt.Println("Payload", string(res.Payload))
+	return res.Payload, nil
+}
+
+func testQuery(t *testing.T, stub *shim.MockStub, function string, id string) ([]byte, error) {
+	res := stub.MockInvoke("1", [][]byte{[]byte(function), []byte(id)})
+	if res.Status != shim.OK {
+		fmt.Println("Query", id, "failed", string(res.Message))
+		return nil, errors.New(res.Message)
+	}
+	if res.Payload == nil {
+		fmt.Println("Query", id, "failed to get value")
+		return nil, errors.New(("Query failed to get value"))
+	}
+	fmt.Println("Query value", id, " is: ", string(res.Payload))
+	return res.Payload, nil
 }
 
 func Test_Init(t *testing.T) {

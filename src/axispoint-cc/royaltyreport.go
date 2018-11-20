@@ -30,7 +30,7 @@ var getExploitationReportForQueryString = getObjectByQueryFromLedger
 //AddRoyaltyReports : Add Royalty Reports to the ledger
 func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "addRoyaltyReports"
-	logger.Info("ENTERING >", methodName)
+	logger.Info("ENTERING >", methodName, args)
 
 	type RoyaltyReportResponse struct {
 		RoyaltyReportUUID string `json:"royaltyReportUUID"`
@@ -86,7 +86,7 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 	}
 
 	objBytes, _ := objectToJSON(royaltyReportResponses)
-	logger.Info("EXITING <", methodName)
+	logger.Info("EXITING <", methodName, royaltyReportResponses)
 	return shim.Success(objBytes)
 }
 
@@ -111,7 +111,7 @@ func getExploitationReportUUID(stub shim.ChaincodeStubInterface, royaltyReport R
 	}
 
 	if len(exploitationReports) <= 0 {
-		errorMessage := fmt.Sprintf("Cannot find Exploitation Report with Source: %s, ISRC: %s, Exploitation Date: %s, , Territory: %s", royaltyReport.Source, royaltyReport.Isrc, royaltyReport.ExploitationDate, royaltyReport.Territory)
+		errorMessage := fmt.Sprintf("Cannot find Exploitation Report with Source: %s, ISRC: %s, Exploitation Date: %s, Territory: %s", royaltyReport.Source, royaltyReport.Isrc, royaltyReport.ExploitationDate, royaltyReport.Territory)
 		return exploitationReportUUID, errors.New(errorMessage)
 	}
 
