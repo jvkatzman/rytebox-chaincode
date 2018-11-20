@@ -11,11 +11,13 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT string = "ROYALTYREPORT"
+	ROYALTYREPORT      string = "ROYALTYREPORT"
+	EXPLOITATIONREPORT string = "EXPLOITATIONREPORT"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
 type ExploitationReport struct {
+	DocType                string `json:"docType"`
 	SongTitle              string `json:"songTitle"`
 	WriterName             string `json:"writerName"`
 	Isrc                   string `json:"isrc"`
