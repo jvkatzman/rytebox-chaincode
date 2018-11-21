@@ -38,25 +38,6 @@ func checkState(t *testing.T, stub *shim.MockStub, name string, value string) {
 	}
 }
 
-func checkInvoke(t *testing.T, transactionHash string, stub *shim.MockStub, args [][]byte, retval []byte) {
-	res := stub.MockInvoke(transactionHash, args)
-	if res.Status != shim.OK {
-		fmt.Println("Invoke", args, "failed", string(res.Message))
-		t.FailNow()
-	}
-
-	if retval != nil {
-		if res.Payload == nil {
-			fmt.Printf("Invoke returned nil, expected %s", string(retval))
-			t.FailNow()
-		}
-		if string(res.Payload) != string(retval) {
-			fmt.Printf("Invoke returned %s, expected %s", string(res.Payload), string(retval))
-			t.FailNow()
-		}
-	}
-}
-
 func checkQuery(t *testing.T, stub *shim.MockStub, args [][]byte, retval []byte) {
 	res := stub.MockInvoke("1", args)
 	if res.Status != shim.OK {
@@ -70,7 +51,7 @@ func checkQuery(t *testing.T, stub *shim.MockStub, args [][]byte, retval []byte)
 	fmt.Println("Query Result", " was: ", string(res.Payload))
 }
 
-func testInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) ([]byte, error) {
+func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) ([]byte, error) {
 	res := stub.MockInvoke("1", args)
 	if res.Status != shim.OK {
 		fmt.Println("Invoke", args, "failed", string(res.Message))

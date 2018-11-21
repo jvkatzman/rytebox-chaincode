@@ -24,7 +24,7 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-// GetExploitationReportForQueryString function returns exploitation reports based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
+// GetExploitationReportForQueryString : Get exploitation reports based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
 var getExploitationReportForQueryString = getObjectByQueryFromLedger
 
 //AddRoyaltyReports : Add Royalty Reports to the ledger
@@ -38,10 +38,17 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 		Success           bool   `json:"success"`
 	}
 
+	type RoyaltyReportOutput struct {
+		SuccessCount   int                     `json:"successCount"`
+		FailureCount   int                     `json:"failureCount"`
+		RoyaltyReports []RoyaltyReportResponse `json:"royaltyReports"`
+	}
+
 	if len(args) != 1 {
 		return getErrorResponse("Missing arguments: Needed RoyaltyReport object to Create")
 	}
 
+	royaltyReportOutput := RoyaltyReportOutput{}
 	royaltyReports := &[]RoyaltyReport{}
 	royaltyReportResponses := []RoyaltyReportResponse{}
 
@@ -62,6 +69,7 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 			royaltyReportResponse.Success = false
 			royaltyReportResponse.Message = err.Error()
 			royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
+			royaltyReportOutput.FailureCount++
 			continue
 		}
 
@@ -73,6 +81,7 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 			royaltyReportResponse.Success = false
 			royaltyReportResponse.Message = err.Error()
 			royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
+			royaltyReportOutput.FailureCount++
 			continue
 		}
 
@@ -82,11 +91,19 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 			royaltyReportResponse.Message = err.Error()
 		}
 
+		if royaltyReportResponse.Success {
+			royaltyReportOutput.SuccessCount++
+		} else {
+			royaltyReportOutput.FailureCount++
+		}
+
 		royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
 	}
 
-	objBytes, _ := objectToJSON(royaltyReportResponses)
-	logger.Info("EXITING <", methodName, royaltyReportResponses)
+	royaltyReportOutput.RoyaltyReports = royaltyReportResponses
+
+	objBytes, _ := objectToJSON(royaltyReportOutput)
+	logger.Info("EXITING <", methodName, royaltyReportOutput)
 	return shim.Success(objBytes)
 }
 
@@ -96,7 +113,7 @@ func getExploitationReportUUID(stub shim.ChaincodeStubInterface, royaltyReport R
 	logger.Info("ENTERING >", methodName)
 
 	exploitationReportUUID := ""
-	queryString := "{\"selector\":{\"docType\":\"" + EXPLOITATIONREPORT + "\",\"source\": \"" + royaltyReport.Source + "\",\"isrc\": \"" + royaltyReport.Isrc + "\",\"exploitationDate\": \"" + royaltyReport.ExploitationDate + "\",\"territory\": \"" + royaltyReport.Territory + "\"}}"
+	queryString := "{\"selector\":{\"docType\":\"" + EXPLOITATIONREPORT + "\",\"source\": \"" + royaltyReport.Source + "\",\"isrc\": \"" + royaltyReport.Isrc + "\",\"exploitationDate\": \"" + royaltyReport.ExploitationDate + "\",\"territory\": \"" + royaltyReport.Territory + "\",\"usageType\": \"" + royaltyReport.UsageType + "\"}}"
 	logger.Info(methodName, queryString)
 
 	queryResults, err := getExploitationReportForQueryString(stub, queryString)
@@ -111,7 +128,7 @@ func getExploitationReportUUID(stub shim.ChaincodeStubInterface, royaltyReport R
 	}
 
 	if len(exploitationReports) <= 0 {
-		errorMessage := fmt.Sprintf("Cannot find Exploitation Report with Source: %s, ISRC: %s, Exploitation Date: %s, Territory: %s", royaltyReport.Source, royaltyReport.Isrc, royaltyReport.ExploitationDate, royaltyReport.Territory)
+		errorMessage := fmt.Sprintf("Cannot find Exploitation Report with Source: %s, ISRC: %s, Exploitation Date: %s, Territory: %s, Usage Type: %s", royaltyReport.Source, royaltyReport.Isrc, royaltyReport.ExploitationDate, royaltyReport.Territory, royaltyReport.UsageType)
 		return exploitationReportUUID, errors.New(errorMessage)
 	}
 
