@@ -146,3 +146,63 @@ func getErrorResponse(message string) pb.Response {
 	}
 	return shim.Success(response)
 }
+
+// resetWorldState - remove all data from the world state
+// ================================================================================
+func resetWorldState(stub shim.ChaincodeStubInterface) (int, error) {
+	methodName := "resetWorldState"
+	logger.Infof("Begin execution - %s.", methodName)
+	defer logger.Infof("End execution - %s.", methodName)
+	startKey := ""
+	endKey := ""
+	recordsDeletedCount := 0
+
+	iterator, err := stub.GetStateByRange(startKey, endKey)
+	defer iterator.Close()
+	if err != nil {
+		message := fmt.Sprintf("%s - Failed to get state by range with error: %s", methodName, err)
+		logger.Error(message)
+		return recordsDeletedCount, err
+	}
+
+	for iterator.HasNext() {
+		responseRange, err := iterator.Next()
+		if err != nil {
+			errorMsg := fmt.Sprintf("Failed to get next record from iterator: %s", err.Error())
+			logger.Error(errorMsg)
+			return recordsDeletedCount, err
+		}
+
+		recordKey := responseRange.GetKey()
+		logger.Infof("About to delete record with key %s", recordKey)
+		err = stub.DelState(recordKey)
+		if err != nil {
+			errorMsg := fmt.Sprintf("Failed to delete record '%d' with key %s: %s", recordsDeletedCount, recordKey, err.Error())
+			logger.Error(errorMsg)
+			return recordsDeletedCount, err
+		}
+		recordsDeletedCount++
+		logger.Debugf("%s - Successfully deleted record '%d' with key: %s", methodName, recordsDeletedCount, recordKey)
+	}
+	logger.Infof("%s - Total # of records deleted : %d", methodName, recordsDeletedCount)
+	return recordsDeletedCount, nil
+}
+
+//resetLedger - remove all data from the world state.
+/*
+* @params   {Array} args - empty array
+* @return   {pb.Response}    - peer Response
+ */
+func resetLedger(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	recordsDeletedCount, err := resetWorldState(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	return shim.Success([]byte(fmt.Sprintf("resetLedger - deleted %d records.", recordsDeletedCount)))
+}
+
+// return a default ping response
+func ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	logger.Infof("Chaincode pinged successfully..")
+	return shim.Success([]byte("Ping OK"))
+}
