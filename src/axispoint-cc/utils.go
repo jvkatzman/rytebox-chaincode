@@ -187,3 +187,22 @@ func resetWorldState(stub shim.ChaincodeStubInterface) (int, error) {
 	logger.Infof("%s - Total # of records deleted : %d", methodName, recordsDeletedCount)
 	return recordsDeletedCount, nil
 }
+
+//resetLedger - remove all data from the world state.
+/*
+* @params   {Array} args - empty array
+* @return   {pb.Response}    - peer Response
+ */
+func resetLedger(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	recordsDeletedCount, err := resetWorldState(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	return shim.Success([]byte(fmt.Sprintf("resetLedger - deleted %d records.", recordsDeletedCount)))
+}
+
+// return a default ping response
+func ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	logger.Infof("Chaincode pinged successfully..")
+	return shim.Success([]byte("Ping OK"))
+}
