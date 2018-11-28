@@ -144,3 +144,26 @@ func Test_AddRoyaltyReports_Multiple_Failure(t *testing.T) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
 }
+
+// place holder -mock stub not implemented to read data from couch db
+func Test_getRoyaltyDataForPeriod(t *testing.T) {
+	// scc := new(AxispointChaincode)
+	// stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// // Init
+	// checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	// actual, err := checkInvoke(t, stub, [][]byte{[]byte("addRoyaltyReports"), []byte(royaltyReportMultiple2_in)})
+	// if err != nil {
+	// 	t.Fatalf(err.Error())
+	// }
+
+	// expected, err := checkInvoke(t, stub, [][]byte{[]byte("getRoyaltyDataForPeriod"), []byte("20170131"), []byte("M86322")})
+	// if err != nil {
+	// 	t.Fatalf(err.Error())
+	// }
+
+	//fmt.Printf("actual - \n%s", actual)
+	//fmt.Printf("retrieved - \n%s", expected)
+
+}
