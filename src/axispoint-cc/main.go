@@ -41,6 +41,8 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["addRoyaltyReports"] = addRoyaltyReports
 	t.funcMap["addExploitationReports"] = addExploitationReports
 	t.funcMap["getRoyaltyDataForPeriod"] = getRoyaltyDataForPeriod
+	t.funcMap["resetLedger"] = resetLedger
+	t.funcMap["ping"] = ping
 }
 
 // Init - intialize chaincode
