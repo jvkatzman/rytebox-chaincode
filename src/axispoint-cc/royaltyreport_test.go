@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -42,6 +43,11 @@ func MockGetRoyaltyReportResponse(functionName string) []byte {
 	default:
 		return []byte("[]")
 	}
+}
+
+func MockGetRoyaltyReportForPeriod(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
+	//return []string{`{"amount":"18.5034375","docType":"ROYALTYREPORT","exploitationDate":"20170131","exploitationReportUUID":"7cb134b2-156f-32e0-a4d9-6165c6ad1aca","isrc":"00055524","rightType":"PERF","royaltyReportUUID":"2e0d3d18-f25f-36d0-81ef-6e3da893d4aa","songTitle":"GECKOS!!","source":"P8819H","target":"W998","territory":"AUS","units":226,"usageType":"SDIGP","writerName":"KIERAN CASH"},{"amount":"12.404250000000001","docType":"ROYALTYREPORT","exploitationDate":"20170131","exploitationReportUUID":"6874280d-2897-3321-b238-0b4dfa0aa516","isrc":"00055524","rightType":"MECH","royaltyReportUUID":"7f384cbf-0d0d-3698-9714-841b8ecb73f9","songTitle":"GECKOS!!","source":"P8819H","target":"W998","territory":"AUS","units":150,"usageType":"SDIGM","writerName":"KIERAN CASH"},{"amount":"12.366","docType":"ROYALTYREPORT","exploitationDate":"20170131","exploitationReportUUID":"8ab33826-399f-3707-a0af-dfedc3d3b7f3","isrc":"00055524","rightType":"MECH","royaltyReportUUID":"94c878c5-f754-3b04-b90e-4f01cbd54ad6","songTitle":"GECKOS!!","source":"P8819H","target":"W998","territory":"AUS","units":164,"usageType":"SMECH","writerName":"KIERAN CASH"}`}, nil
+	return []string{`{"docType":"ROYALTYREPORT","royaltyReportUUID":"2e0d3d18-f25f-36d0-81ef-6e3da893d4aa","exploitationReportUUID":"7cb134b2-156f-32e0-a4d9-6165c6ad1aca","source":"P8819H","isrc":"00055524","songTitle":"GECKOS!!","writerName":"KIERAN CASH","units":226,"exploitationDate":"20170131","amount":"18.5034375","rightType":"PERF","territory":"AUS","usageType":"SDIGP","target":"W998"},{"docType":"ROYALTYREPORT","royaltyReportUUID":"7f384cbf-0d0d-3698-9714-841b8ecb73f9","exploitationReportUUID":"6874280d-2897-3321-b238-0b4dfa0aa516","source":"P8819H","isrc":"00055524","songTitle":"GECKOS!!","writerName":"KIERAN CASH","units":150,"exploitationDate":"20170131","amount":"12.404250000000001","rightType":"MECH","territory":"AUS","usageType":"SDIGM","target":"W998"},{"docType":"ROYALTYREPORT","royaltyReportUUID":"94c878c5-f754-3b04-b90e-4f01cbd54ad6","exploitationReportUUID":"8ab33826-399f-3707-a0af-dfedc3d3b7f3","source":"P8819H","isrc":"00055524","songTitle":"GECKOS!!","writerName":"KIERAN CASH","units":164,"exploitationDate":"20170131","amount":"12.366","rightType":"MECH","territory":"AUS","usageType":"SMECH","target":"W998"}`}, nil
 }
 
 func Test_AddRoyaltyReports_Single(t *testing.T) {
@@ -147,23 +153,22 @@ func Test_AddRoyaltyReports_Multiple_Failure(t *testing.T) {
 
 // place holder -mock stub not implemented to read data from couch db
 func Test_getRoyaltyDataForPeriod(t *testing.T) {
-	// scc := new(AxispointChaincode)
-	// stub := shim.NewMockStub("AxispointChaincode", scc)
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
 
-	// // Init
-	// checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
 
-	// actual, err := checkInvoke(t, stub, [][]byte{[]byte("addRoyaltyReports"), []byte(royaltyReportMultiple2_in)})
-	// if err != nil {
-	// 	t.Fatalf(err.Error())
-	// }
+	getRoyaltyReportsForQueryString = MockGetRoyaltyReportForPeriod
+	actualOutput, err := checkInvoke(t, stub, [][]byte{[]byte("getRoyaltyDataForPeriod"), []byte("20170131"), []byte("M86322")})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	mockOutput, err := MockGetRoyaltyReportForPeriod(stub, "")
+	//we need this becuase the data types are different -- normalize to string
+	expectedOutput := fmt.Sprintf("[%s]", mockOutput[0])
 
-	// expected, err := checkInvoke(t, stub, [][]byte{[]byte("getRoyaltyDataForPeriod"), []byte("20170131"), []byte("M86322")})
-	// if err != nil {
-	// 	t.Fatalf(err.Error())
-	// }
-
-	//fmt.Printf("actual - \n%s", actual)
-	//fmt.Printf("retrieved - \n%s", expected)
-
+	if !reflect.DeepEqual(expectedOutput, string(actualOutput)) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
 }
