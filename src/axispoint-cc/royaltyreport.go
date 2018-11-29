@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -97,10 +96,9 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 		if royaltyReportResponse.Success {
 			royaltyReportOutput.SuccessCount++
 		} else {
+			royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
 			royaltyReportOutput.FailureCount++
 		}
-
-		royaltyReportResponses = append(royaltyReportResponses, royaltyReportResponse)
 	}
 
 	royaltyReportOutput.RoyaltyReports = royaltyReportResponses
@@ -154,6 +152,7 @@ func getRoyaltyDataForPeriod(stub shim.ChaincodeStubInterface, args []string) pb
 		logger.Error(errMsg)
 		return shim.Error(errMsg)
 	}
+
 	exploitationDate := args[0]
 	targetCreator := args[1]
 	//do a rich query to get the data from the ledger
@@ -162,22 +161,18 @@ func getRoyaltyDataForPeriod(stub shim.ChaincodeStubInterface, args []string) pb
 
 	queryResult, err := getRoyaltyReportsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
 	if err != nil {
-		errMsg := fmt.Sprintf("%s - Failed to get results for query: %s.  Error: %s", methodName, queryString, err.Error())
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
+		return getErrorResponse(err.Error())
 	}
+
 	var resultRoyaltyReports []RoyaltyReport
 	err = sliceToStruct(queryResult, &resultRoyaltyReports)
 	if err != nil {
-		errMsg := fmt.Sprintf("%s - Failed to convert query string result to struct: %s.  Error: %s", methodName, queryResult, err.Error())
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
+		return getErrorResponse(err.Error())
 	}
-	queryResultBytes, err := json.Marshal(resultRoyaltyReports)
+
+	queryResultBytes, err := objectToJSON(resultRoyaltyReports)
 	if err != nil {
-		errMsg := fmt.Sprintf("%s - Failed to convert royalty reports stuct to bytes.  Error: %s", methodName, err.Error())
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
+		return getErrorResponse(err.Error())
 	}
 	logger.Infof("result(s) received from couch db: %s", string(queryResultBytes))
 

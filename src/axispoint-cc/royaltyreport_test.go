@@ -33,11 +33,11 @@ func MockGetExploitationReportQueryResultForQueryString(stub shim.ChaincodeStubI
 func MockGetRoyaltyReportResponse(functionName string) []byte {
 	switch functionName {
 	case "Test_AddRoyaltyReports_Single":
-		return []byte(`{"successCount":1,"failureCount":0,"royaltyReports":[{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8fe","message":"","success":true}]}`)
+		return []byte(`{"successCount":1,"failureCount":0,"royaltyReports":[]}`)
 	case "Test_AddRoyaltyReports_Single_Failure":
 		return []byte(`{"successCount":0,"failureCount":1,"royaltyReports":[{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8fe","message":"Cannot find Exploitation Report with Source: M86321, ISRC: 00029523, Exploitation Date: 20170131, Territory: AUS, Usage Type: SDIGM","success":false}]}`)
 	case "Test_AddRoyaltyReports_Multiple":
-		return []byte(`{"successCount":2,"failureCount":0,"royaltyReports":[{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8fe","message":"","success":true},{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8ff","message":"","success":true}]}`)
+		return []byte(`{"successCount":2,"failureCount":0,"royaltyReports":[]}`)
 	case "Test_AddRoyaltyReports_Multiple_Failure":
 		return []byte(`{"successCount":0,"failureCount":2,"royaltyReports":[{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8fe","message":"Cannot find Exploitation Report with Source: M86321, ISRC: 00029524, Exploitation Date: 20170131, Territory: AUS, Usage Type: SDIGM","success":false},{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8ff","message":"Cannot find Exploitation Report with Source: M86321, ISRC: 00029525, Exploitation Date: 20170131, Territory: AUS, Usage Type: SDIGM","success":false}]}`)
 	default:
