@@ -173,6 +173,7 @@ func getQueryResultInBytes(stub shim.ChaincodeStubInterface, queryString string)
 
 	methodName := "getQueryResultInBytes()"
 	logger.Infof("- Begin execution -  %s", methodName)
+	defer logger.Infof("- End execution -  %s", methodName)
 
 	logger.Infof("%s - query received: %s", methodName, queryString)
 	resultsIterator, err := stub.GetQueryResult(queryString)
@@ -196,6 +197,5 @@ func getQueryResultInBytes(stub shim.ChaincodeStubInterface, queryString string)
 	}
 	queryResults = append(queryResults, ']')
 
-	logger.Infof("- End execution -  %s", methodName)
 	return queryResults, nil
 }
