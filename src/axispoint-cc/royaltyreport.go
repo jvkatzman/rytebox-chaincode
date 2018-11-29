@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -27,6 +28,7 @@ import (
 
 // GetExploitationReportForQueryString : Get exploitation reports based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
 var getExploitationReportForQueryString = getObjectByQueryFromLedger
+var getRoyaltyReportsForQueryString = getObjectByQueryFromLedger
 
 //AddRoyaltyReports : Add Royalty Reports to the ledger
 func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -157,9 +159,23 @@ func getRoyaltyDataForPeriod(stub shim.ChaincodeStubInterface, args []string) pb
 	//do a rich query to get the data from the ledger
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"target\":\"%s\",\"exploitationDate\":{\"$lte\":\"%s\"}}}", ROYALTYREPORT, targetCreator, exploitationDate)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
-	queryResultBytes, err := getQueryResultInBytes(stub, queryString)
+
+	queryResult, err := getRoyaltyReportsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
 	if err != nil {
 		errMsg := fmt.Sprintf("%s - Failed to get results for query: %s.  Error: %s", methodName, queryString, err.Error())
+		logger.Error(errMsg)
+		return shim.Error(errMsg)
+	}
+	var resultRoyaltyReports []RoyaltyReport
+	err = sliceToStruct(queryResult, &resultRoyaltyReports)
+	if err != nil {
+		errMsg := fmt.Sprintf("%s - Failed to convert query string result to struct: %s.  Error: %s", methodName, queryResult, err.Error())
+		logger.Error(errMsg)
+		return shim.Error(errMsg)
+	}
+	queryResultBytes, err := json.Marshal(resultRoyaltyReports)
+	if err != nil {
+		errMsg := fmt.Sprintf("%s - Failed to convert royalty reports stuct to bytes.  Error: %s", methodName, err.Error())
 		logger.Error(errMsg)
 		return shim.Error(errMsg)
 	}
@@ -167,35 +183,4 @@ func getRoyaltyDataForPeriod(stub shim.ChaincodeStubInterface, args []string) pb
 
 	//return bytes as result
 	return shim.Success(queryResultBytes)
-}
-
-func getQueryResultInBytes(stub shim.ChaincodeStubInterface, queryString string) ([]byte, error) {
-
-	methodName := "getQueryResultInBytes()"
-	logger.Infof("- Begin execution -  %s", methodName)
-	defer logger.Infof("- End execution -  %s", methodName)
-
-	logger.Infof("%s - query received: %s", methodName, queryString)
-	resultsIterator, err := stub.GetQueryResult(queryString)
-	if err != nil {
-		return nil, fmt.Errorf("%s - Failed with error: %s", methodName, err.Error())
-	}
-	defer resultsIterator.Close()
-	//we must add '[]' to query results so that all the results are included within a json array
-	queryResults := []byte("[")
-	for resultsIterator.HasNext() {
-
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return nil, fmt.Errorf("%s - result iteration failed with error: %s", methodName, err.Error())
-		}
-		//we must also add ',' after each time a result is append to the array to keep in a consistent json format
-		queryResults = append(queryResults, queryResponse.GetValue()...)
-		if resultsIterator.HasNext() {
-			queryResults = append(queryResults, ',')
-		}
-	}
-	queryResults = append(queryResults, ']')
-
-	return queryResults, nil
 }
