@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Knetic/govaluate"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -61,6 +62,12 @@ func addRoyaltyReports(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 
 	// Iterate over Royalty Reports
 	for _, royaltyReport := range *royaltyReports {
+		expression, err := govaluate.NewEvaluableExpression("foo.Isrc == '00055524'")
+		parameters := make(map[string]interface{}, 8)
+		parameters["foo"] = royaltyReport
+		result, err := expression.Evaluate(parameters)
+		logger.Info("royaltyReport.Isrc>>>>", royaltyReport.Isrc, ">>>>>>.", result)
+
 		royaltyReport.DocType = ROYALTYREPORT
 		royaltyReportResponse := RoyaltyReportResponse{}
 		royaltyReportResponse.RoyaltyReportUUID = royaltyReport.RoyaltyReportUUID
