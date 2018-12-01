@@ -168,6 +168,13 @@ func readToken(stream *lexerStream, state lexerState, functions map[string]Expre
 				kind = COMPARATOR
 			}
 
+			if tokenValue == "nin" || tokenValue == "NIN" {
+
+				// force lower case for consistency
+				tokenValue = "nin"
+				kind = COMPARATOR
+			}
+
 			// function?
 			function, found = functions[tokenString]
 			if found {
