@@ -11,8 +11,9 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT      string = "ROYALTYREPORT"
-	EXPLOITATIONREPORT string = "EXPLOITATIONREPORT"
+	ROYALTYREPORT       string = "ROYALTYREPORT"
+	EXPLOITATIONREPORT  string = "EXPLOITATIONREPORT"
+	COPYRIGHTDATAREPORT string = "COPYRIGHTDATAREPORT"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
@@ -46,4 +47,10 @@ type RoyaltyReport struct {
 	Territory              string `json:"territory"`
 	UsageType              string `json:"usageType"`
 	Target                 string `json:"target"`
+}
+
+//CopyrightDataReport : struct definition
+type CopyrightDataReport struct {
+	DocType           string `json:"docType"`
+	CopyrightDataUUID string `json:"copyrightDataReportUUID"`
 }
