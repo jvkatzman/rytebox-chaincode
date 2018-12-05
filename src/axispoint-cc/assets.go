@@ -49,18 +49,18 @@ type RoyaltyReport struct {
 	Target                 string `json:"target"`
 }
 
-//HolderRepresentation : struct defining data model for Holder Representation
-type HolderRepresentation struct {
-	DocType                  string           `json:"docType"`
-	HolderRepresentationUUID string           `json:"holderRepresentationUUID"`
-	Holder                   string           `json:"holder"`
-	HolderName               string           `json:"holderName"`
-	StartDate                string           `json:"startDate"`
-	EndDate                  string           `json:"endDate"`
-	Representations          []Representation `json:"representations"`
+//OwnerAdministration : struct defining data model for Owner Administration
+type OwnerAdministration struct {
+	DocType                 string           `json:"docType"`
+	OwnerAdministrationUUID string           `json:"ownerAdministrationUUID"`
+	Owner                   string           `json:"owner"`
+	OwnerName               string           `json:"ownerName"`
+	StartDate               string           `json:"startDate"`
+	EndDate                 string           `json:"endDate"`
+	Representations         []Representation `json:"representations"`
 }
 
-//Representation : struct defining data model for Holder Representation
+//Representation : struct defining data model for Owner Administration
 type Representation struct {
 	Selector           string `json:"selector"`
 	Representative     string `json:"representative"`
