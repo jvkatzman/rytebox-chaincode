@@ -13,8 +13,8 @@ var getCopyrightDataReportForQueryString = getObjectByQueryFromLedger
 
 // addCopyrightDataReport - remove all data from the world state
 // ================================================================================
-func addCopyrightDataReport(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "addCopyrightDataReport"
+func addCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "addCopyrightDataReports"
 	logger.Info("ENTERING >", methodName, args)
 
 	type CopyrightDataReportResponse struct {
@@ -42,23 +42,12 @@ func addCopyrightDataReport(stub shim.ChaincodeStubInterface, args []string) pb.
 		return getErrorResponse(err.Error())
 	}
 
-	// Iterate over Royalty Reports
+	// Iterate over Copyright Reports
 	for _, copyrightDataReport := range *copyrightDataReports {
 		copyrightDataReport.DocType = COPYRIGHTDATAREPORT
 		copyrightDataReportResponse := CopyrightDataReportResponse{}
 		copyrightDataReportResponse.CopyrightDataReportUUID = copyrightDataReport.CopyrightDataUUID
 		copyrightDataReportResponse.Success = true
-
-		copyrightDataReportUUID, err := getCopyrightDataReportUUID(stub, copyrightDataReport)
-		if err != nil {
-			copyrightDataReportResponse.Success = false
-			copyrightDataReportResponse.Message = err.Error()
-			copyrightDataReportResponses = append(copyrightDataReportResponses, copyrightDataReportResponse)
-			copyrightDataReportOutput.FailureCount++
-			continue
-		}
-
-		copyrightDataReport.CopyrightDataUUID = copyrightDataReportUUID
 
 		//Record royaltyReport on ledger
 		copyrightDataReporBytes, err := objectToJSON(copyrightDataReport)
@@ -96,9 +85,11 @@ func getCopyrightDataReportUUID(stub shim.ChaincodeStubInterface, copyrightDataR
 	var methodName = "getCopyrightDataReportUUID"
 	logger.Info("ENTERING >", methodName)
 
+	//return "1cfbdb47-cca7-3eca-b73e-0d6c478a4eaa", nil
+
 	getCopyrightDataReportUUID := ""
 	//queryString := "{\"selector\":{\"docType\":\"" + EXPLOITATIONREPORT + "\",\"source\": \"" + royaltyReport.Source + "\",\"isrc\": \"" + royaltyReport.Isrc + "\",\"exploitationDate\": \"" + royaltyReport.ExploitationDate + "\",\"territory\": \"" + royaltyReport.Territory + "\",\"usageType\": \"" + royaltyReport.UsageType + "\"}}"
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"id\":\"%s\"}}", COPYRIGHTDATAREPORT, "????")
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReport.Isrc)
 	logger.Info(methodName, queryString)
 
 	queryResults, err := getCopyrightDataReportForQueryString(stub, queryString)
@@ -114,7 +105,7 @@ func getCopyrightDataReportUUID(stub shim.ChaincodeStubInterface, copyrightDataR
 
 	if len(copyrightDataReports) <= 0 {
 		//update message
-		errorMessage := "UPDATE MESSAGE" //fmt.Sprintf("Cannot find Copyright Data Report with Source: %s, ISRC: %s, Exploitation Date: %s, Territory: %s, Usage Type: %s", royaltyReport.Source, royaltyReport.Isrc, royaltyReport.ExploitationDate, royaltyReport.Territory, royaltyReport.UsageType)
+		errorMessage := fmt.Sprintf("Cannot find Copyright Data Report with ISRC: %s", copyrightDataReport.Isrc)
 		return getCopyrightDataReportUUID, errors.New(errorMessage)
 	}
 
@@ -124,23 +115,23 @@ func getCopyrightDataReportUUID(stub shim.ChaincodeStubInterface, copyrightDataR
 	return getCopyrightDataReportUUID, nil
 }
 
-// getCopyrightData - remove all data from the world state
+// getCopyrightDataByID - retrieve a copyright data report by id by an array
 // ================================================================================
-func getCopyrightData(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	var methodName = "getCopyrightData"
+	var methodName = "getCopyrightDataReportByID"
 	logger.Infof("%s - Begin Execution ", methodName)
 	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
 	defer logger.Infof("%s - End Execution ", methodName)
 
 	if len(args) < 1 {
-		message := fmt.Sprintf("Incorrect number of parameters received.")
+		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
 		return shim.Error(message)
 	}
 
 	copyrightDataReportID := args[0]
 
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"id\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportID)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportID)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
 	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
@@ -148,17 +139,101 @@ func getCopyrightData(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		return getErrorResponse(err.Error())
 	}
 
-	resultCopyrightReport := CopyrightDataReport{}
-	err = sliceToStruct(queryResult, &resultCopyrightReport)
+	resultCopyrightReports := []CopyrightDataReport{}
+	err = sliceToStruct(queryResult, &resultCopyrightReports)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 
-	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReport)
+	// we should just have a single item in the result array
+	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports[0])
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 	logger.Debugf("result(s) received from couch db: %s", string(copyrightReportResultBytes))
 
 	return shim.Success(copyrightReportResultBytes)
+}
+
+// deleteCopyrightDataByIDs - delete a copyright data report by ids in an array
+// ================================================================================
+func deleteCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	var methodName = "deleteCopyrightDataReportByIDs"
+	logger.Infof("%s - Begin Execution ", methodName)
+	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
+	defer logger.Infof("%s - End Execution ", methodName)
+	deletedRecordCount := 0
+
+	if len(args) < 1 {
+		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
+		logger.Error(message)
+		return shim.Error(message)
+	}
+
+	for _, copyrightDataReportUUID := range args {
+		logger.Infof("%s - deleting copyright record with uuid: %s", methodName, copyrightDataReportUUID)
+		err := stub.DelState(copyrightDataReportUUID)
+		if err != nil {
+			message := fmt.Sprintf("%s - Failed to delete copyright data report with id : %s", methodName, copyrightDataReportUUID)
+			logger.Info(message)
+		} else {
+			deletedRecordCount++
+		}
+	}
+
+	logger.Infof("%s - successfully deleted %d records.", methodName, deletedRecordCount)
+	return shim.Success([]byte(fmt.Sprintf("deleted %d records.", deletedRecordCount)))
+}
+
+// updateCopyrightDataReport - update an existing copyright data report
+// ================================================================================
+func updateCopyrightDataReport(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	var methodName = "updateCopyrightDataReport"
+	logger.Infof("%s - Begin Execution ", methodName)
+	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	if len(args) < 1 {
+		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
+		logger.Error(message)
+		return shim.Error(message)
+	}
+	updatedCopyrightDataReport := CopyrightDataReport{}
+
+	err := jsonToObject([]byte(args[0]), &updatedCopyrightDataReport)
+	if err != nil {
+		logger.Errorf("%s - failed to convert ")
+		return getErrorResponse(err.Error())
+	}
+
+	existingReportBytes, err := stub.GetState(updatedCopyrightDataReport.CopyrightDataUUID)
+	if err != nil {
+		message := fmt.Sprintf("%s - Failed to check if the existing report with id %s can be updated.", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+		logger.Error(message)
+		return shim.Error(message)
+	}
+
+	if existingReportBytes == nil {
+		message := fmt.Sprintf("%s - report with id %s cannot be updated since it was not found on the ledger.", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+		logger.Error(message)
+		return shim.Error(message)
+	}
+
+	updatedReportBytes, err := objectToJSON(updatedCopyrightDataReport)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	err = stub.PutState(updatedCopyrightDataReport.CopyrightDataUUID, updatedReportBytes)
+	if err != nil {
+		message := fmt.Sprintf("%s - Failed to update existing report with id %s wth error : %s.", methodName, updatedCopyrightDataReport.CopyrightDataUUID, err.Error())
+		logger.Error(message)
+		return shim.Error(message)
+	}
+
+	logger.Infof("%s - successfully updated existing report with id: %s", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+
+	return shim.Success(nil)
 }

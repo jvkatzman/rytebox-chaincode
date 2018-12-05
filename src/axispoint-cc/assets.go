@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // Response -  Object to store Response Status and Message
 // ================================================================================
 type Response struct {
@@ -51,6 +53,17 @@ type RoyaltyReport struct {
 
 //CopyrightDataReport : struct definition
 type CopyrightDataReport struct {
-	DocType           string `json:"docType"`
-	CopyrightDataUUID string `json:"copyrightDataReportUUID"`
+	DocType           string        `json:"docType"`
+	CopyrightDataUUID string        `json:"copyrightDataReportUUID"`
+	Isrc              string        `json:"isrc"`
+	SongTitle         string        `json:"songTitle"`
+	StartDate         time.Time     `json:"startDate,string"`
+	EndDate           time.Time     `json:"endDate,string"`
+	RightHolders      []RightHolder `json:"rightHolders"`
+}
+
+//RightHolder : struct definition for copyright data report
+type RightHolder struct {
+	IPI     string `json:"ipi"`
+	Percent int    `json:"percent"`
 }
