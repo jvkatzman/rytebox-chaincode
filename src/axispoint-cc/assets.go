@@ -11,8 +11,9 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT      string = "ROYALTYREPORT"
-	EXPLOITATIONREPORT string = "EXPLOITATIONREPORT"
+	ROYALTYREPORT        string = "ROYALTYREPORT"
+	EXPLOITATIONREPORT   string = "EXPLOITATIONREPORT"
+	HOLDERREPRESENTATION string = "HOLDERREPRESENTATION"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
@@ -46,4 +47,22 @@ type RoyaltyReport struct {
 	Territory              string `json:"territory"`
 	UsageType              string `json:"usageType"`
 	Target                 string `json:"target"`
+}
+
+//HolderRepresentation : struct defining data model for Holder Representation
+type HolderRepresentation struct {
+	DocType                  string           `json:"docType"`
+	HolderRepresentationUUID string           `json:"holderRepresentationUUID"`
+	Holder                   string           `json:"holder"`
+	HolderName               string           `json:"holderName"`
+	StartDate                string           `json:"startDate"`
+	EndDate                  string           `json:"endDate"`
+	Representations          []Representation `json:"representations"`
+}
+
+//Representation : struct defining data model for Holder Representation
+type Representation struct {
+	Selector           string `json:"selector"`
+	Representative     string `json:"representative"`
+	RepresentativeName string `json:"representativeName"`
 }
