@@ -98,7 +98,7 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 	for _, copyrightDataReportUUID := range args {
 		inSubQuery += fmt.Sprintf("\"%s\",", copyrightDataReportUUID)
 	}
-	//remove the last commma and add the remaining tags
+	//remove the last commma and add the remaining closing tags
 	inSubQuery = strings.TrimSuffix(inSubQuery, ",") + "]}"
 
 	//queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportUUID)
@@ -160,9 +160,9 @@ func deleteCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []str
 
 // updateCopyrightDataReport - update an existing copyright data report
 // ================================================================================
-func updateCopyrightDataReport(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func updateCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	var methodName = "updateCopyrightDataReport"
+	var methodName = "updateCopyrightDataReports"
 	logger.Infof("%s - Begin Execution ", methodName)
 	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
 	defer logger.Infof("%s - End Execution ", methodName)
@@ -172,40 +172,42 @@ func updateCopyrightDataReport(stub shim.ChaincodeStubInterface, args []string) 
 		logger.Error(message)
 		return shim.Error(message)
 	}
-	updatedCopyrightDataReport := CopyrightDataReport{}
+	updatedCopyrightDataReports := &[]CopyrightDataReport{}
 
-	err := jsonToObject([]byte(args[0]), &updatedCopyrightDataReport)
+	err := jsonToObject([]byte(args[0]), updatedCopyrightDataReports)
 	if err != nil {
 		logger.Errorf("%s - failed to convert ")
 		return getErrorResponse(err.Error())
 	}
 
-	existingReportBytes, err := stub.GetState(updatedCopyrightDataReport.CopyrightDataUUID)
-	if err != nil {
-		message := fmt.Sprintf("%s - Failed to check if the existing report with id %s can be updated.", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
-		logger.Error(message)
-		return shim.Error(message)
-	}
+	for _, updatedCopyrightDataReport := range *updatedCopyrightDataReports {
+		existingReportBytes, err := stub.GetState(updatedCopyrightDataReport.CopyrightDataUUID)
+		if err != nil {
+			message := fmt.Sprintf("%s - Failed to check if the existing report with id %s can be updated.", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+			logger.Error(message)
+			return shim.Error(message)
+		}
 
-	if existingReportBytes == nil {
-		message := fmt.Sprintf("%s - report with id %s cannot be updated since it was not found on the ledger.", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
-		logger.Error(message)
-		return shim.Error(message)
-	}
+		if existingReportBytes == nil {
+			message := fmt.Sprintf("%s - report with id %s cannot be updated since it was not found on the ledger.", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+			logger.Error(message)
+			return shim.Error(message)
+		}
 
-	updatedReportBytes, err := objectToJSON(updatedCopyrightDataReport)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
+		updatedReportBytes, err := objectToJSON(updatedCopyrightDataReport)
+		if err != nil {
+			return getErrorResponse(err.Error())
+		}
 
-	err = stub.PutState(updatedCopyrightDataReport.CopyrightDataUUID, updatedReportBytes)
-	if err != nil {
-		message := fmt.Sprintf("%s - Failed to update existing report with id %s wth error : %s.", methodName, updatedCopyrightDataReport.CopyrightDataUUID, err.Error())
-		logger.Error(message)
-		return shim.Error(message)
-	}
+		err = stub.PutState(updatedCopyrightDataReport.CopyrightDataUUID, updatedReportBytes)
+		if err != nil {
+			message := fmt.Sprintf("%s - Failed to update existing report with id %s wth error : %s.", methodName, updatedCopyrightDataReport.CopyrightDataUUID, err.Error())
+			logger.Error(message)
+			return shim.Error(message)
+		}
 
-	logger.Infof("%s - successfully updated existing report with id: %s", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+		logger.Infof("%s - successfully updated existing report with id: %s", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
+	}
 
 	return shim.Success(nil)
 }
