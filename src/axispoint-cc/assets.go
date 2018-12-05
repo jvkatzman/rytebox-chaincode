@@ -11,9 +11,10 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT        string = "ROYALTYREPORT"
-	EXPLOITATIONREPORT   string = "EXPLOITATIONREPORT"
-	HOLDERREPRESENTATION string = "HOLDERREPRESENTATION"
+	ROYALTYREPORT            string = "ROYALTYREPORT"
+	EXPLOITATIONREPORT       string = "EXPLOITATIONREPORT"
+	HOLDERREPRESENTATION     string = "HOLDERREPRESENTATION"
+	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
@@ -60,9 +61,26 @@ type OwnerAdministration struct {
 	Representations         []Representation `json:"representations"`
 }
 
-//Representation : struct defining data model for Owner Administration
+//Representation : struct defining data model for Representation
 type Representation struct {
 	Selector           string `json:"selector"`
 	Representative     string `json:"representative"`
 	RepresentativeName string `json:"representativeName"`
+}
+
+//AdministratorAffiliation : struct defining data model for Administrator Affiliation
+type AdministratorAffiliation struct {
+	DocType                      string        `json:"docType"`
+	AdministratorAffiliationUUID string        `json:"administratorAffiliationUUID"`
+	Administrator                string        `json:"administrator"`
+	StartDate                    string        `json:"startDate"`
+	EndDate                      string        `json:"endDate"`
+	Affiliations                 []Affiliation `json:"affiliations"`
+}
+
+//Affiliation : struct defining data model for Affiliation
+type Affiliation struct {
+	Selector      string `json:"selector"`
+	Affiliate     string `json:"affiliate"`
+	AffiliateName string `json:"affiliateName"`
 }
