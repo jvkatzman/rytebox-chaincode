@@ -129,9 +129,11 @@ func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string)
 		return shim.Error(message)
 	}
 
-	copyrightDataReportID := args[0]
+	copyrightDataReportUUID := args[0]
+	copyrightDataReportIsrc := ""
 
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportID)
+	//queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportID)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"$or\":[{\"copyrightDataReportUUID\":\"%s\"},{\"isrc\":\"%s\"}]}}", COPYRIGHTDATAREPORT, copyrightDataReportUUID, copyrightDataReportIsrc)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
 	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
