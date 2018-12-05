@@ -44,8 +44,11 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["resetLedger"] = resetLedger
 	t.funcMap["ping"] = ping
 	t.funcMap["deleteAsset"] = deleteAsset
+	t.funcMap["deleteAssetByUUID"] = deleteAssetByUUID
 	t.funcMap["addHolderRepresentations"] = addHolderRepresentations
+	t.funcMap["updateHolderRepresentations"] = updateHolderRepresentations
 	t.funcMap["getHolderRepresentations"] = getHolderRepresentations
+	t.funcMap["getHolderRepresentationByUUID"] = getHolderRepresentationByUUID
 }
 
 // Init - intialize chaincode

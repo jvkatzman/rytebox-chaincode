@@ -207,14 +207,12 @@ func ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return getSuccessResponse("Ping OK")
 }
 
-// DeleteAsset - Delete asset based on arguments
+// DeleteAsset - Delete asset based on docType
 func deleteAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "deleteAsset"
 	logger.Info("ENTERING >", methodName, args)
 
 	recordsDeletedCount := 0
-	logger.Info(len(args))
-	logger.Info(args[0])
 	for _, arg := range args {
 
 		resultIterator, err := stub.GetQueryResult(fmt.Sprintf(`{"selector": {"docType": "%s"}}`, arg))
@@ -238,4 +236,24 @@ func deleteAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	logger.Info("EXITING <", methodName)
 	return getSuccessResponse(fmt.Sprintf("deleteAsset - deleted %d records.", recordsDeletedCount))
+}
+
+// DeleteAsset - Delete asset based on UUID
+func deleteAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "deleteAssetByUUID"
+	logger.Info("ENTERING >", methodName, args)
+
+	recordsDeletedCount := 0
+	for _, arg := range args {
+
+		err := stub.DelState(arg)
+		if err != nil {
+			return getErrorResponse(err.Error())
+		}
+		recordsDeletedCount++
+
+	}
+
+	logger.Info("EXITING <", methodName)
+	return getSuccessResponse(fmt.Sprintf("deleteAssetByUUID - deleted %d records.", recordsDeletedCount))
 }
