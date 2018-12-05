@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 
 var getCopyrightDataReportForQueryString = getObjectByQueryFromLedger
 
-// addCopyrightDataReport - remove all data from the world state
+// addCopyrightDataReport - add a copyright data report
 // ================================================================================
 func addCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "addCopyrightDataReports"
@@ -46,6 +45,7 @@ func addCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb
 	for _, copyrightDataReport := range *copyrightDataReports {
 		copyrightDataReport.DocType = COPYRIGHTDATAREPORT
 		copyrightDataReportResponse := CopyrightDataReportResponse{}
+		//UUID is already present is this valid???
 		copyrightDataReportResponse.CopyrightDataReportUUID = copyrightDataReport.CopyrightDataUUID
 		copyrightDataReportResponse.Success = true
 
@@ -80,46 +80,11 @@ func addCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb
 	return shim.Success(objBytes)
 }
 
-//getExploitationReportUUID : Get the UUID of the exploitation report based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
-func getCopyrightDataReportUUID(stub shim.ChaincodeStubInterface, copyrightDataReport CopyrightDataReport) (string, error) {
-	var methodName = "getCopyrightDataReportUUID"
-	logger.Info("ENTERING >", methodName)
-
-	//return "1cfbdb47-cca7-3eca-b73e-0d6c478a4eaa", nil
-
-	getCopyrightDataReportUUID := ""
-	//queryString := "{\"selector\":{\"docType\":\"" + EXPLOITATIONREPORT + "\",\"source\": \"" + royaltyReport.Source + "\",\"isrc\": \"" + royaltyReport.Isrc + "\",\"exploitationDate\": \"" + royaltyReport.ExploitationDate + "\",\"territory\": \"" + royaltyReport.Territory + "\",\"usageType\": \"" + royaltyReport.UsageType + "\"}}"
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReport.Isrc)
-	logger.Info(methodName, queryString)
-
-	queryResults, err := getCopyrightDataReportForQueryString(stub, queryString)
-	if err != nil {
-		return getCopyrightDataReportUUID, err
-	}
-
-	var copyrightDataReports []CopyrightDataReport
-	err = sliceToStruct(queryResults, &copyrightDataReports)
-	if err != nil {
-		return getCopyrightDataReportUUID, err
-	}
-
-	if len(copyrightDataReports) <= 0 {
-		//update message
-		errorMessage := fmt.Sprintf("Cannot find Copyright Data Report with ISRC: %s", copyrightDataReport.Isrc)
-		return getCopyrightDataReportUUID, errors.New(errorMessage)
-	}
-
-	getCopyrightDataReportUUID = copyrightDataReports[0].CopyrightDataUUID
-
-	logger.Info("EXITING <", methodName, getCopyrightDataReportUUID)
-	return getCopyrightDataReportUUID, nil
-}
-
 // getCopyrightDataByID - retrieve a copyright data report by id by an array
 // ================================================================================
-func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	var methodName = "getCopyrightDataReportByID"
+	var methodName = "getCopyrightDataReportByIDs"
 	logger.Infof("%s - Begin Execution ", methodName)
 	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
 	defer logger.Infof("%s - End Execution ", methodName)
@@ -128,12 +93,16 @@ func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string)
 		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
 		return shim.Error(message)
 	}
+	inSubQuery := `{"$in":[`
+	//copyrightDataReportUUID := args[0]
+	for _, copyrightDataReportUUID := range args {
+		inSubQuery += fmt.Sprintf("\"%s\",", copyrightDataReportUUID)
+	}
+	//remove the last commma and add the remaining tags
+	inSubQuery = strings.TrimSuffix(inSubQuery, ",") + "]}"
 
-	copyrightDataReportUUID := args[0]
-	copyrightDataReportIsrc := ""
-
-	//queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportID)
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"$or\":[{\"copyrightDataReportUUID\":\"%s\"},{\"isrc\":\"%s\"}]}}", COPYRIGHTDATAREPORT, copyrightDataReportUUID, copyrightDataReportIsrc)
+	//queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportUUID)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":%s}}", COPYRIGHTDATAREPORT, inSubQuery)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
 	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
@@ -148,7 +117,8 @@ func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string)
 	}
 
 	// we should just have a single item in the result array
-	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports[0])
+	//copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports[0])
+	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
@@ -238,4 +208,60 @@ func updateCopyrightDataReport(stub shim.ChaincodeStubInterface, args []string) 
 	logger.Infof("%s - successfully updated existing report with id: %s", methodName, updatedCopyrightDataReport.CopyrightDataUUID)
 
 	return shim.Success(nil)
+}
+
+// searchForCopyrightDataReportWithParameters - search for copyright data report(s)
+// method expects an argument list where
+// args[0] must be 'isrc'
+// args[1] must be 'songTitle'
+// args[2] must be 'startDate'
+// args[3] must be 'endDate'
+// ================================================================================
+func searchForCopyrightDataReportWithParameters(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "searchForCopyrightDataReportWithParameters"
+	logger.Infof("%s - Begin Execution ", methodName)
+	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	if len(args) < 1 {
+		message := fmt.Sprintf("%s - incorrect # of arguments received.", methodName)
+		logger.Error(message)
+		return shim.Error(message)
+	}
+	var queryString string
+	//expected arguments
+	switch len(args) {
+	case 1: //isrc
+		queryString = fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\"}}", COPYRIGHTDATAREPORT, args[0])
+	case 2: //isrc && song title
+		queryString = fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"songTitle\":\"%s\"}}", COPYRIGHTDATAREPORT, args[0], args[1])
+	case 3: //isrc && song title && start date
+		queryString = fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"songTitle\":\"%s\", \"startDate\":\"%s\"}}", COPYRIGHTDATAREPORT, args[0], args[1], args[2])
+	case 4: ////isrc && song title && start and end dates
+		queryString = fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"songTitle\":\"%s\", \"startDate\":\"%s\", \"endDate\":\"%s\"}}", COPYRIGHTDATAREPORT, args[0], args[1], args[2], args[3])
+	default:
+		errMsg := fmt.Sprintf("%s - Failed to determine provided args length. arguments : '%s'.", methodName, strings.Join(args, ","))
+		logger.Errorf(errMsg)
+		return shim.Error(errMsg)
+	}
+	logger.Infof("%s - executing couch db query : %s", methodName, queryString)
+	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	resultCopyrightReports := []CopyrightDataReport{}
+	err = sliceToStruct(queryResult, &resultCopyrightReports)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	// we should just have a single item in the result array
+	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+	logger.Debugf("result(s) received from couch db: %s", string(copyrightReportResultBytes))
+
+	return shim.Success(copyrightReportResultBytes)
 }

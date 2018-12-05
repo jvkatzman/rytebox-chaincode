@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -55,7 +54,7 @@ func Test_AddCopyrightDataReports_Single(t *testing.T) {
 	}
 }
 
-func Test_GetCopyrightDataReport(t *testing.T) {
+func Test_GetCopyrightDataReportByID(t *testing.T) {
 
 	scc := new(AxispointChaincode)
 	stub := shim.NewMockStub("AxispointChaincode", scc)
@@ -68,16 +67,66 @@ func Test_GetCopyrightDataReport(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	// fmt.Println("-----------------------------")
-	// fmt.Printf("actual - \n%s\n", actual)
-	// var copyrightDataReportUUID = "1cfbdb47-cca7-3eca-b73e-0d6c478a4eaa"
+
 	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
-	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByID"), []byte(copyrightDataReportUUID)})
+	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByIDs"), []byte(copyrightDataReportUUID)})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	fmt.Println("-----------------------------")
-	fmt.Printf("actual - \n%s\n", actual)
 
-	//t.FailNow()
+	expectedReports, err := MockGetCopyrightDataReport(stub, "")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	//normalize []string to string
+	if !reflect.DeepEqual("["+expectedReports[0]+"]", string(actualReport)) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
+}
+
+//Test_deleteCopyrightDataReportByIDs
+func Test_DeleteCopyrightDataReportByIDs(t *testing.T) {
+
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(copyrightDataReportSingleInput)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	//invoke delete method
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("deleteCopyrightDataReportByIDs"), []byte(copyrightDataReportUUID)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	//we're expecting to delete a single record
+	expected := "deleted 1 records."
+
+	if !reflect.DeepEqual(expected, string(actual)) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
+
+}
+
+//test - updateCopyrightDataReport
+func Test_updateCopyrightDataReportByIDs(t *testing.T) {
+
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(copyrightDataReportSingleInput)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
 }
