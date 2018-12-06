@@ -7,12 +7,17 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-const copyrightDataReportUUID = "1cfbdb47-cca7-3eca-b73e-0d6c478a5abc"
+var copyrightDataReportUUID = "1cfbdb47-cca7-3eca-b73e-0d6c478a5abc"
 
 //var copyrightDataReportSingleInput = `[{"one":"1","two":"2","three":"3","docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a4eaa"}]`
 var copyrightDataReportSingleInput = `[{"copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","docType":"COPYRIGHTDATAREPORT","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}]`
-var copyrightDataReportSingleOutput = `{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}`
+var copyrightDataReportMultipleInput = `[{"copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","docType":"COPYRIGHTDATAREPORT","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]},{"copyrightDataReportUUID":"2cfbdb47-cca7-3eca-b73e-0d6c478a6abc","docType":"COPYRIGHTDATAREPORT","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}]`
+var copyrightDataReportSingleOutput1 = `{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}`
+var copyrightDataReportSingleOutput2 = `{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"2cfbdb47-cca7-3eca-b73e-0d6c478a6abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}`
 var updatedCopyrightDateReportSingleInput = `[{"copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","docType":"COPYRIGHTDATAREPORT","isrc":"1234567Src","songTitle":"modified","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}]`
+
+var copyrightDataReportMultipleOutput1 = `{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}`
+var copyrightDataReportMultipleOutput2 = `{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"2cfbdb47-cca7-3eca-b73e-0d6c478a6abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"ipi":"ipi1","percent":42},{"ipi":"ipi2","percent":33}]}`
 
 func MockGetCopyrightDataReportResponse(functionName string) []byte {
 	switch functionName {
@@ -45,7 +50,7 @@ func Test_AddCopyrightDataReports_Single(t *testing.T) {
 	}
 
 	// Check State for Transaction
-	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportSingleOutput)
+	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportSingleOutput1)
 
 	expected := MockGetCopyrightDataReportResponse("Test_AddCopyrightDataReports_Single")
 	// fmt.Println("-----------------------------")
@@ -171,9 +176,63 @@ func Test_updateCopyrightDataReports_Single(t *testing.T) {
 	}
 
 	// Check State for Transaction
-	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportSingleOutput)
+	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportSingleOutput1)
 
 	expected := MockGetCopyrightDataReportResponse("Test_AddCopyrightDataReports_Single")
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
+}
+
+//Test the Edge cases
+func Test_AddCopyrightDataReports_Empty1(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(`[]`)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
+
+func Test_AddCopyrightDataReports_Empty2(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte("")})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
+
+func Test_AddCopyrightDataReport_Multiple(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(copyrightDataReportMultipleInput)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	// Check State for first Exploitation Report
+	//var ownerAdministrationUUID = "85fff2bf-00a2-423b-9567-55c6f4ee6ee1"
+	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportMultipleOutput1)
+
+	// Check State for second Exploitation Report
+	copyrightDataReportUUID = "2cfbdb47-cca7-3eca-b73e-0d6c478a6abc"
+	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportMultipleOutput2)
+
+	expected := MockGetCopyrightDataReportResponse("Test_AddCopyrightDataReports_Multiple")
+
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
