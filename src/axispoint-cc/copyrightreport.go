@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -158,6 +159,7 @@ func deleteCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []str
 	return shim.Success([]byte(fmt.Sprintf("deleted %d records.", deletedRecordCount)))
 }
 
+/*
 // updateCopyrightDataReport - update an existing copyright data report
 // ================================================================================
 func updateCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -210,7 +212,7 @@ func updateCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string)
 	}
 
 	return shim.Success(nil)
-}
+}*/
 
 // searchForCopyrightDataReportWithParameters - search for copyright data report(s)
 // method expects an argument list where
@@ -300,4 +302,97 @@ func getAllCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string)
 
 	//return bytes as result
 	return shim.Success(queryResultBytes)
+}
+
+// updateCopyrightDataReports function contains business logic to update
+// Owner Administrations on the Ledger
+/*
+* @params   {Array} args
+* @property {string} 0       - stringified JSON array of copyrightdata.
+* @return   {pb.Response}    - peer Response
+ */
+func updateCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "updateCopyrightDataReports"
+	logger.Infof("%s - Begin Execution ", methodName)
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	type CopyrightDataReportResponse struct {
+		CopyrightDataReportUUID string `json:"copyrightDataReportUUID"`
+		Message                 string `json:"message"`
+		Success                 bool   `json:"success"`
+	}
+
+	type CopyrightDataReportOutput struct {
+		SuccessCount         int                           `json:"successCount"`
+		FailureCount         int                           `json:"failureCount"`
+		CopyrightDataReports []CopyrightDataReportResponse `json:"copyrightDataReports"`
+	}
+
+	//Check if array length is greater than 0
+	if len(args) < 1 {
+		return getErrorResponse("Missing arguments: Array of Copyright Data Reports objects is required")
+	}
+	logger.Infof("%s - Parameters received: %s ", methodName, strings.Join(args, ","))
+
+	copyrightDataReportOutput := CopyrightDataReportOutput{}
+	copyrightDataReports := &[]CopyrightDataReport{}
+	copyrightDataReportResponses := []CopyrightDataReportResponse{}
+
+	//Unmarshal the args input to an array of copyrightDataReports
+	err := jsonToObject([]byte(args[0]), copyrightDataReports)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	// Iterate over copyrightDataReport
+	for _, copyrightDataReport := range *copyrightDataReports {
+		var existingReportBytes []byte
+		var errMessage string
+		copyrightDataReport.DocType = COPYRIGHTDATAREPORT
+		copyrightDataReportResponse := CopyrightDataReportResponse{}
+		copyrightDataReportResponse.CopyrightDataReportUUID = copyrightDataReport.CopyrightDataUUID
+		copyrightDataReportResponse.Success = true
+
+		//Record copyrightDataReport on ledger
+		copyrightDataReportBytes, err := objectToJSON(copyrightDataReport)
+		if err == nil {
+			existingReportBytes, err = stub.GetState(copyrightDataReport.CopyrightDataUUID)
+			if err != nil {
+				errMessage = fmt.Sprintf("%s - Failed to check if the existing report with id %s can be updated.  Error: %s", methodName, copyrightDataReport.CopyrightDataUUID, err.Error())
+				logger.Error(errMessage)
+			}
+		}
+		if existingReportBytes == nil {
+			errMessage += fmt.Sprintf("%s - report with id %s cannot be updated since it was not found on the ledger.", methodName, copyrightDataReport.CopyrightDataUUID)
+			logger.Error(errMessage)
+			err = errors.New(errMessage)
+		}
+		if err != nil {
+			logger.Infof("%s - error found for report id: %s", methodName, copyrightDataReport.CopyrightDataUUID)
+			copyrightDataReportResponse.Success = false
+			copyrightDataReportResponse.Message = err.Error()
+			copyrightDataReportResponses = append(copyrightDataReportResponses, copyrightDataReportResponse)
+			copyrightDataReportOutput.FailureCount++
+			continue
+		}
+
+		err = stub.PutState(copyrightDataReport.CopyrightDataUUID, copyrightDataReportBytes)
+		if err != nil {
+			copyrightDataReportResponse.Success = false
+			copyrightDataReportResponse.Message = err.Error()
+		}
+
+		if copyrightDataReportResponse.Success {
+			copyrightDataReportOutput.SuccessCount++
+		} else {
+			copyrightDataReportResponses = append(copyrightDataReportResponses, copyrightDataReportResponse)
+			copyrightDataReportOutput.FailureCount++
+		}
+	}
+
+	copyrightDataReportOutput.CopyrightDataReports = copyrightDataReportResponses
+
+	objBytes, _ := objectToJSON(copyrightDataReportOutput)
+	logger.Infof("%s - updated copyright reports output: %s.", methodName, copyrightDataReportOutput)
+	return shim.Success(objBytes)
 }
