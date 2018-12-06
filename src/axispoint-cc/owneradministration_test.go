@@ -30,7 +30,7 @@ func MockGetOwnerAdministrationResponse(functionName string) []byte {
 	case "Test_GetOwnerAdministrationByUUID":
 		return []byte(`{"docType":"HOLDERREPRESENTATION","ownerAdministrationUUID":"85fff2bf-00a2-423b-9567-55c6f4ee6ee1","owner":"GECKOS!!","ownerName":"KIERAN CASH","startDate":"20180131","endDate":"20181231","representations":[{"selector":"12.366","representative":"111111","representativeName":"test1"},{"selector":"12.366","representative":"222222","representativeName":"test2"}]}`)
 	case "Test_GetOwnerAdministrationByUUID_Failure":
-		return []byte(`{"status":"500","message":"Owner Administration with UUID: 85fff2bf-00a2-423b-9567-55c6f4ee6ee2 does not exist"}`)
+		return []byte(`{"status":"500","message":"UUID: 85fff2bf-00a2-423b-9567-55c6f4ee6ee2 does not exist"}`)
 	default:
 		return []byte("[]")
 	}
@@ -38,6 +38,8 @@ func MockGetOwnerAdministrationResponse(functionName string) []byte {
 
 func MockGetOwnerAdministrationQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
 	if strings.Contains(queryString, "HOLDERREPRESENTATION") {
+		return []string{`{"docType":"HOLDERREPRESENTATION","ownerAdministrationUUID":"85fff2bf-00a2-423b-9567-55c6f4ee6ee1","owner":"GECKOS!!","ownerName":"KIERAN CASH","startDate":"20180131","endDate":"20181231","representations":[{"selector":"12.366","representative":"111111","representativeName":"test1"},{"selector":"12.366","representative":"222222","representativeName":"test2"}]},{"docType":"HOLDERREPRESENTATION","ownerAdministrationUUID":"817903a5-8a5f-4d51-af47-5bae33fc15b3","owner":"GECKOS!!","ownerName":"KIERAN CASH","startDate":"20180131","endDate":"20181231","representations":[{"selector":"12.366","representative":"111111","representativeName":"test1"},{"selector":"12.366","representative":"222222","representativeName":"test2"}]}`}, nil
+	} else {
 		return []string{`{"docType":"HOLDERREPRESENTATION","ownerAdministrationUUID":"85fff2bf-00a2-423b-9567-55c6f4ee6ee1","owner":"GECKOS!!","ownerName":"KIERAN CASH","startDate":"20180131","endDate":"20181231","representations":[{"selector":"12.366","representative":"111111","representativeName":"test1"},{"selector":"12.366","representative":"222222","representativeName":"test2"}]},{"docType":"HOLDERREPRESENTATION","ownerAdministrationUUID":"817903a5-8a5f-4d51-af47-5bae33fc15b3","owner":"GECKOS!!","ownerName":"KIERAN CASH","startDate":"20180131","endDate":"20181231","representations":[{"selector":"12.366","representative":"111111","representativeName":"test1"},{"selector":"12.366","representative":"222222","representativeName":"test2"}]}`}, nil
 	}
 	return nil, nil
@@ -176,7 +178,7 @@ func Test_GetOwnerAdministrationByUUID(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getOwnerAdministrationByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee1")})
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAssetByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee1")})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -201,7 +203,7 @@ func Test_GetOwnerAdministrationByUUID_Failure(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getOwnerAdministrationByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee2")})
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAssetByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee2")})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

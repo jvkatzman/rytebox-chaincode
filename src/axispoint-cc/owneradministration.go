@@ -171,34 +171,12 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 }
 
 //getOwnerAdministrations: get owner administrations
-func getOwnerAdministrationByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "getOwnerAdministrationByUUID"
-	logger.Info("ENTERING >", methodName, args)
-
-	//Check if array length is greater than 0
-	if len(args) < 1 {
-		return getErrorResponse("Missing arguments: Owner Administration UUID is missing")
-	}
-
-	ownerAdministrationBytes, err := stub.GetState(args[0])
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-	if ownerAdministrationBytes == nil {
-		return getErrorResponse(fmt.Sprintf("Owner Administration with UUID: %s does not exist", args[0]))
-	}
-
-	//return bytes as result
-	return shim.Success(ownerAdministrationBytes)
-}
-
-//getOwnerAdministrations: get owner administrations
 func getOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "getOwnerAdministrations"
 	logger.Info("ENTERING >", methodName, args)
 
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", HOLDERREPRESENTATION)
-	if len(args) > 1 {
+	if len(args) == 1 {
 		queryString = args[0]
 	}
 

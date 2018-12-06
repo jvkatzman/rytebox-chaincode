@@ -171,34 +171,12 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 }
 
 //getAdministratorAffiliations: get administrator affiliations
-func getAdministratorAffiliationByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "getAdministratorAffiliationByUUID"
-	logger.Info("ENTERING >", methodName, args)
-
-	//Check if array length is greater than 0
-	if len(args) < 1 {
-		return getErrorResponse("Missing arguments: Administrator Affiliation UUID is missing")
-	}
-
-	administratorAffiliationBytes, err := stub.GetState(args[0])
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-	if administratorAffiliationBytes == nil {
-		return getErrorResponse(fmt.Sprintf("Administrator Affiliation with UUID: %s does not exist", args[0]))
-	}
-
-	//return bytes as result
-	return shim.Success(administratorAffiliationBytes)
-}
-
-//getAdministratorAffiliations: get administrator affiliations
 func getAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "getAdministratorAffiliations"
 	logger.Info("ENTERING >", methodName, args)
 
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", ADMINISTRATORAFFILIATION)
-	if len(args) > 1 {
+	if len(args) == 1 {
 		queryString = args[0]
 	}
 
