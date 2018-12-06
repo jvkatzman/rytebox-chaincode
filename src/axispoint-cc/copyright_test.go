@@ -152,3 +152,29 @@ func Test_updateCopyrightDataReportByIDs(t *testing.T) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
 }
+
+func Test_updateCopyrightDataReports_Single(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+	// Add Owner Administration
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(copyrightDataReportSingleInput)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("updateCopyrightDataReports"), []byte(copyrightDataReportSingleInput)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	// Check State for Transaction
+	checkState(t, stub, copyrightDataReportUUID, copyrightDataReportSingleOutput)
+
+	expected := MockGetCopyrightDataReportResponse("Test_AddCopyrightDataReports_Single")
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
+}
