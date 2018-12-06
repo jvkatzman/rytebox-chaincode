@@ -115,7 +115,6 @@ func Test_DeleteCopyrightDataReportByIDs(t *testing.T) {
 	if !reflect.DeepEqual(expected, string(actual)) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
-
 }
 
 //test - updateCopyrightDataReport

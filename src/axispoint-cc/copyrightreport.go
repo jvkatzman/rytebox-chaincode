@@ -91,17 +91,17 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 
 	if len(args) < 1 {
 		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
+		logger.Error(message)
 		return shim.Error(message)
 	}
 	inSubQuery := `{"$in":[`
-	//copyrightDataReportUUID := args[0]
+
 	for _, copyrightDataReportUUID := range args {
 		inSubQuery += fmt.Sprintf("\"%s\",", copyrightDataReportUUID)
 	}
+
 	//remove the last commma and add the remaining closing tags
 	inSubQuery = strings.TrimSuffix(inSubQuery, ",") + "]}"
-
-	//queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":\"%s\"}}", COPYRIGHTDATAREPORT, copyrightDataReportUUID)
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":%s}}", COPYRIGHTDATAREPORT, inSubQuery)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
@@ -117,11 +117,11 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 	}
 
 	// we should just have a single item in the result array
-	//copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports[0])
 	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
+
 	logger.Debugf("result(s) received from couch db: %s", string(copyrightReportResultBytes))
 
 	return shim.Success(copyrightReportResultBytes)
@@ -266,4 +266,38 @@ func searchForCopyrightDataReportWithParameters(stub shim.ChaincodeStubInterface
 	logger.Debugf("result(s) received from couch db: %s", string(copyrightReportResultBytes))
 
 	return shim.Success(copyrightReportResultBytes)
+}
+
+//getAllCopyrightDataReports: get all the copyright data reports that exist
+func getAllCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "getAllCopyrightDataReports"
+	logger.Infof("%s - Begin Execution ", methodName)
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", COPYRIGHTDATAREPORT)
+	if len(args) > 1 {
+		queryString = args[0]
+	}
+
+	logger.Info("%s - executing rich query : %s.", methodName, queryString)
+
+	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	var resultCopyrightDataReports []CopyrightDataReport
+	err = sliceToStruct(queryResult, &resultCopyrightDataReports)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	queryResultBytes, err := objectToJSON(resultCopyrightDataReports)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+	logger.Info("result(s) received from couch db: %s", string(queryResultBytes))
+
+	//return bytes as result
+	return shim.Success(queryResultBytes)
 }
