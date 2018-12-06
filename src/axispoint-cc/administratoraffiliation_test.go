@@ -30,7 +30,7 @@ func MockGetAdministratorAffiliationResponse(functionName string) []byte {
 	case "Test_GetAdministratorAffiliationByUUID":
 		return []byte(`{"docType":"ADMINISTRATORAFFILIATION","administratorAffiliationUUID":"85fff2bf-00a2-423b-9567-55c6f4ee6ee1","administrator":"GECKOS!!","startDate":"20180131","endDate":"20181231","affiliations":[{"selector":"12.366","affiliate":"111111","affiliateName":"test1"},{"selector":"12.366","affiliate":"222222","affiliateName":"test2"}]}`)
 	case "Test_GetAdministratorAffiliationByUUID_Failure":
-		return []byte(`{"status":"500","message":"Administrator Affiliation with UUID: 85fff2bf-00a2-423b-9567-55c6f4ee6ee2 does not exist"}`)
+		return []byte(`{"status":"500","message":"UUID: 85fff2bf-00a2-423b-9567-55c6f4ee6ee2 does not exist"}`)
 	default:
 		return []byte("[]")
 	}
@@ -176,7 +176,7 @@ func Test_GetAdministratorAffiliationByUUID(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAdministratorAffiliationByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee1")})
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAssetByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee1")})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -201,7 +201,7 @@ func Test_GetAdministratorAffiliationByUUID_Failure(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAdministratorAffiliationByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee2")})
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAssetByUUID"), []byte("85fff2bf-00a2-423b-9567-55c6f4ee6ee2")})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

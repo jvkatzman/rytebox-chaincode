@@ -238,7 +238,7 @@ func deleteAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return getSuccessResponse(fmt.Sprintf("deleteAsset - deleted %d records.", recordsDeletedCount))
 }
 
-// DeleteAsset - Delete asset based on UUID
+// DeleteAsset - Delete asset based on UUIDs
 func deleteAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "deleteAssetByUUID"
 	logger.Info("ENTERING >", methodName, args)
@@ -256,4 +256,26 @@ func deleteAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 
 	logger.Info("EXITING <", methodName)
 	return getSuccessResponse(fmt.Sprintf("deleteAssetByUUID - deleted %d records.", recordsDeletedCount))
+}
+
+// getAssetByUUID - Get asset based on UUID
+func getAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "getAssetByUUID"
+	logger.Info("ENTERING >", methodName, args)
+
+	//Check if array length is greater than 0
+	if len(args) < 1 {
+		return getErrorResponse("Missing arguments: UUID is missing")
+	}
+
+	objectBytes, err := stub.GetState(args[0])
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+	if objectBytes == nil {
+		return getErrorResponse(fmt.Sprintf("UUID: %s does not exist", args[0]))
+	}
+
+	//return bytes as result
+	return shim.Success(objectBytes)
 }
