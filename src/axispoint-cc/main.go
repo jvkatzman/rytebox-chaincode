@@ -49,6 +49,16 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["updateCopyrightDataReports"] = updateCopyrightDataReports
 	t.funcMap["searchForCopyrightDataReportWithParameters"] = searchForCopyrightDataReportWithParameters
 	t.funcMap["getAllCopyrightDataReports"] = getAllCopyrightDataReports
+	t.funcMap["deleteAsset"] = deleteAsset
+	t.funcMap["deleteAssetByUUID"] = deleteAssetByUUID
+	t.funcMap["addOwnerAdministrations"] = addOwnerAdministrations
+	t.funcMap["updateOwnerAdministrations"] = updateOwnerAdministrations
+	t.funcMap["getOwnerAdministrations"] = getOwnerAdministrations
+	t.funcMap["getOwnerAdministrationByUUID"] = getOwnerAdministrationByUUID
+	t.funcMap["addAdministratorAffiliations"] = addAdministratorAffiliations
+	t.funcMap["updateAdministratorAffiliations"] = updateAdministratorAffiliations
+	t.funcMap["getAdministratorAffiliations"] = getAdministratorAffiliations
+	t.funcMap["getAdministratorAffiliationByUUID"] = getAdministratorAffiliationByUUID
 }
 
 // Init - intialize chaincode
