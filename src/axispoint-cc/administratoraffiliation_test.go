@@ -39,6 +39,8 @@ func MockGetAdministratorAffiliationResponse(functionName string) []byte {
 func MockGetAdministratorAffiliationQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
 	if strings.Contains(queryString, "ADMINISTRATORAFFILIATION") {
 		return []string{`{"docType":"ADMINISTRATORAFFILIATION","administratorAffiliationUUID":"85fff2bf-00a2-423b-9567-55c6f4ee6ee1","administrator":"GECKOS!!","startDate":"20180131","endDate":"20181231","affiliations":[{"selector":"12.366","affiliate":"111111","affiliateName":"test1"},{"selector":"12.366","affiliate":"222222","affiliateName":"test2"}]},{"docType":"ADMINISTRATORAFFILIATION","administratorAffiliationUUID":"817903a5-8a5f-4d51-af47-5bae33fc15b3","administrator":"GECKOS!!","startDate":"20180131","endDate":"20181231","affiliations":[{"selector":"12.366","affiliate":"111111","affiliateName":"test1"},{"selector":"12.366","affiliate":"222222","affiliateName":"test2"}]}`}, nil
+	} else {
+		return []string{`{"docType":"ADMINISTRATORAFFILIATION","administratorAffiliationUUID":"85fff2bf-00a2-423b-9567-55c6f4ee6ee1","administrator":"GECKOS!!","startDate":"20180131","endDate":"20181231","affiliations":[{"selector":"12.366","affiliate":"111111","affiliateName":"test1"},{"selector":"12.366","affiliate":"222222","affiliateName":"test2"}]},{"docType":"ADMINISTRATORAFFILIATION","administratorAffiliationUUID":"817903a5-8a5f-4d51-af47-5bae33fc15b3","administrator":"GECKOS!!","startDate":"20180131","endDate":"20181231","affiliations":[{"selector":"12.366","affiliate":"111111","affiliateName":"test1"},{"selector":"12.366","affiliate":"222222","affiliateName":"test2"}]}`}, nil
 	}
 	return nil, nil
 }
