@@ -217,20 +217,8 @@ func ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
  * @return {(boolean, error)} (boolean, error) - the
  */
 func evaluate(selector string, asset interface{}) (interface{}, error) {
-	if asset == nil {
-		err := errors.New("wrong parameter value: the 'asset' param cannot be nil")
-		logger.Error(err)
-		return nil, err
-	}
-
-	if reflect.ValueOf(asset).Kind() != reflect.Ptr {
-		err := errors.New("wrong parameter type: the 'asset' param has to be a struct pointer")
-		logger.Error(err)
-		return nil, err
-	}
-
-	if reflect.ValueOf(asset).Elem().Kind() != reflect.Struct {
-		err := errors.New("wrong parameter type: the 'asset' param has to be a struct pointer")
+	if asset == nil || reflect.ValueOf(asset).Kind() != reflect.Ptr || reflect.ValueOf(asset).Elem().Kind() != reflect.Struct {
+		err := errors.New("wrong parameter type: the 'asset' param has to be a struct instance pointer")
 		logger.Error(err)
 		return nil, err
 	}
