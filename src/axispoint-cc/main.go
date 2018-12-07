@@ -42,8 +42,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["addExploitationReports"] = addExploitationReports
 	t.funcMap["updateExploitationReports"] = updateExploitationReports
 	t.funcMap["getExploitationReports"] = getExploitationReports
-	t.funcMap["getRoyaltyDataForPeriod"] = getRoyaltyDataForPeriod
-	t.funcMap["queryRoyaltyStatements"] = queryRoyaltyStatements
+	t.funcMap["getRoyaltyStatements"] = getRoyaltyStatements
 	t.funcMap["resetLedger"] = resetLedger
 	t.funcMap["ping"] = ping
 	t.funcMap["addCopyrightDataReports"] = addCopyrightDataReports

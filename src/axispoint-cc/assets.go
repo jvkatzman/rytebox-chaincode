@@ -32,18 +32,18 @@ const (
 
 //ExploitationReport : struct defining data model for Exploitation Reports
 type ExploitationReport struct {
-	DocType                string  `json:"docType"`
-	Source                 string  `json:"source"`
-	SongTitle              string  `json:"songTitle"`
-	WriterName             string  `json:"writerName"`
-	Isrc                   string  `json:"isrc"`
-	Units                  int     `json:"units"`
-	ExploitationDate       string  `json:"exploitationDate"`
-	Amount                 float32 `json:"amount"`
-	UsageType              string  `json:"usageType"`
-	ExploitationReportUUID string  `json:"exploitationReportUUID"`
-	Territory              string  `json:"territory"`
-	State                  string  `json:"state"`
+	DocType                string `json:"docType"`
+	Source                 string `json:"source"`
+	SongTitle              string `json:"songTitle"`
+	WriterName             string `json:"writerName"`
+	Isrc                   string `json:"isrc"`
+	Units                  int    `json:"units"`
+	ExploitationDate       string `json:"exploitationDate"`
+	Amount                 string `json:"amount"`
+	UsageType              string `json:"usageType"`
+	ExploitationReportUUID string `json:"exploitationReportUUID"`
+	Territory              string `json:"territory"`
+	State                  string `json:"state"`
 }
 
 //RoyaltyStatement : struct defining data model for Royalty Reports

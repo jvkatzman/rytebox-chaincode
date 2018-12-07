@@ -141,63 +141,19 @@ func getExploitationReportUUID(stub shim.ChaincodeStubInterface, royaltyReport R
 	return exploitationReportUUID, nil
 }
 
-//get paid royalty data for a given period
-//expected parameters: exploitation date and the target(the creator)
-func getRoyaltyDataForPeriod(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "getRoyaltyDataForPeriod"
-	logger.Infof("%s - Begin Execution ", methodName)
-	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
-	defer logger.Infof("%s - End Execution ", methodName)
-
-	if len(args) < 2 {
-		errMsg := fmt.Sprintf("%s - Incorrect number of parameters provided : %s.  Expecting exploitation date and target.", methodName, strings.Join(args, ","))
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
-	}
-
-	exploitationDate := args[0]
-	targetCreator := args[1]
-	//do a rich query to get the data from the ledger
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"target\":\"%s\",\"exploitationDate\":{\"$lte\":\"%s\"}}}", ROYALTYSTATEMENT, targetCreator, exploitationDate)
-	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
-
-	queryResult, err := getRoyaltyStatementsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	var resultRoyaltyStatements []RoyaltyStatement
-	err = sliceToStruct(queryResult, &resultRoyaltyStatements)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	queryResultBytes, err := objectToJSON(resultRoyaltyStatements)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-	logger.Infof("result(s) received from couch db: %s", string(queryResultBytes))
-
-	//return bytes as result
-	return shim.Success(queryResultBytes)
-}
-
 //get paid royalty data based on a selector string
 //expected parameters: selector string
-func queryRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "queryRoyaltyStatements"
+func getRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "getRoyaltyStatements"
 	logger.Infof("%s - Begin Execution ", methodName)
 	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
 	defer logger.Infof("%s - End Execution ", methodName)
 
-	if len(args) < 1 {
-		errMsg := fmt.Sprintf("%s - Incorrect number of parameters provided : %s.  Expecting selector string.", methodName, strings.Join(args, ","))
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", ROYALTYSTATEMENT)
+	if len(args) == 1 {
+		queryString = args[0]
 	}
 
-	//do a rich query to get the data from the ledger
-	queryString := args[0]
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
 	queryResult, err := getRoyaltyStatementsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
