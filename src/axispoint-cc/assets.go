@@ -13,11 +13,11 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT            string = "ROYALTYREPORT"
 	EXPLOITATIONREPORT       string = "EXPLOITATIONREPORT"
 	HOLDERREPRESENTATION     string = "HOLDERREPRESENTATION"
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
+	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
 )
 
 /////////////////////////////////////////////////////
@@ -46,10 +46,10 @@ type ExploitationReport struct {
 	State                  string  `json:"state"`
 }
 
-//RoyaltyReport : struct defining data model for Royalty Reports
-type RoyaltyReport struct {
+//RoyaltyStatement : struct defining data model for Royalty Reports
+type RoyaltyStatement struct {
 	DocType                string `json:"docType"`
-	RoyaltyReportUUID      string `json:"royaltyReportUUID"`
+	RoyaltyStatementUUID   string `json:"royaltyStatementUUID"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
 	Source                 string `json:"source"`
 	Isrc                   string `json:"isrc"`
@@ -61,7 +61,10 @@ type RoyaltyReport struct {
 	RightType              string `json:"rightType"`
 	Territory              string `json:"territory"`
 	UsageType              string `json:"usageType"`
-	Target                 string `json:"target"`
+	RightHolder            string `json:"rightHolder"`
+	Administrator          string `json:"administrator"`
+	Collector              string `json:"collector"`
+	State                  string `json:"state"`
 }
 
 //CopyrightDataReport : struct definition
