@@ -149,6 +149,15 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 			continue
 		}
 
+		administratorAffiliationExistingBytes, err := stub.GetState(administratorAffiliation.AdministratorAffiliationUUID)
+		if administratorAffiliationExistingBytes == nil {
+			administratorAffiliationResponse.Success = false
+			administratorAffiliationResponse.Message = "Administrator Affiliation does not exist!"
+			administratorAffiliationResponses = append(administratorAffiliationResponses, administratorAffiliationResponse)
+			administratorAffiliationOutput.FailureCount++
+			continue
+		}
+
 		err = stub.PutState(administratorAffiliation.AdministratorAffiliationUUID, administratorAffiliationBytes)
 		if err != nil {
 			administratorAffiliationResponse.Success = false
