@@ -33,7 +33,7 @@ func TestEvaluate_CorrectSimpleSelectorsForExploitation_ShouldReturnTrueThenFals
 func TestEvaluate_CorrectSelectorMultipleConjunctionForExploitation_ShouldReturnTrueThenFalse(t *testing.T) {
 	var exploitationReport = getExploitationReport(exploitationReport_in, t)
 	testEval(correctTrueExploitationSelectorWithMultipleConjunctions, &exploitationReport, false, true, t)
-	testEval(correctFalseSelectorWithMultipleConjunctions, &exploitationReport, false, true, t)
+	testEval(correctFalseSelectorWithMultipleConjunctions, &exploitationReport, false, false, t)
 }
 
 func TestEvaluate_CorrectSelectorMultipleLogicalOperators_ShouldReturnTrue(t *testing.T) {
