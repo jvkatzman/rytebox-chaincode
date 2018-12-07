@@ -40,6 +40,8 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap = make(map[string]InvokeFunc)
 	t.funcMap["addRoyaltyReports"] = addRoyaltyReports
 	t.funcMap["addExploitationReports"] = addExploitationReports
+	t.funcMap["updateExploitationReports"] = updateExploitationReports
+	t.funcMap["getExploitationReports"] = getExploitationReports
 	t.funcMap["getRoyaltyDataForPeriod"] = getRoyaltyDataForPeriod
 	t.funcMap["resetLedger"] = resetLedger
 	t.funcMap["ping"] = ping

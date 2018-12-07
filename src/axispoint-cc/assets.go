@@ -20,19 +20,30 @@ const (
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 )
 
+/////////////////////////////////////////////////////
+// Constant for the Exploitation Report State field values
+/////////////////////////////////////////////////////
+const (
+	INITIAL                      string = "INITIAL"
+	UNKNOWN_RIGHT_HOLDER         string = "UNKNOWN_RIGHT_HOLDER"
+	INCONSISTENT_COPYRIGHT_SPLIT string = "INCONSISTENT_COPYRIGHT_SPLIT"
+	INCOMPLETE_COPYRIGHT_SPLIT   string = "INCOMPLETE_COPYRIGHT_SPLIT"
+)
+
 //ExploitationReport : struct defining data model for Exploitation Reports
 type ExploitationReport struct {
-	DocType                string `json:"docType"`
-	Source                 string `json:"source"`
-	SongTitle              string `json:"songTitle"`
-	WriterName             string `json:"writerName"`
-	Isrc                   string `json:"isrc"`
-	Units                  int    `json:"units"`
-	ExploitationDate       string `json:"exploitationDate"`
-	Amount                 string `json:"amount"`
-	UsageType              string `json:"usageType"`
-	ExploitationReportUUID string `json:"exploitationReportUUID"`
-	Territory              string `json:"territory"`
+	DocType                string  `json:"docType"`
+	Source                 string  `json:"source"`
+	SongTitle              string  `json:"songTitle"`
+	WriterName             string  `json:"writerName"`
+	Isrc                   string  `json:"isrc"`
+	Units                  int     `json:"units"`
+	ExploitationDate       string  `json:"exploitationDate"`
+	Amount                 float32 `json:"amount"`
+	UsageType              string  `json:"usageType"`
+	ExploitationReportUUID string  `json:"exploitationReportUUID"`
+	Territory              string  `json:"territory"`
+	State                  string  `json:"state"`
 }
 
 //RoyaltyReport : struct defining data model for Royalty Reports
