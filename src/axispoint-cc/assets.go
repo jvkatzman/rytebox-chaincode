@@ -66,8 +66,9 @@ type CopyrightDataReport struct {
 
 //RightHolder : struct definition for copyright data report
 type RightHolder struct {
-	IPI     string `json:"ipi"`
-	Percent int    `json:"percent"`
+	Selector string `json:"selector"`
+	IPI      string `json:"ipi"`
+	Percent  int    `json:"percent"`
 }
 
 //OwnerAdministration : struct defining data model for Owner Administration
