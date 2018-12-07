@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // Response -  Object to store Response Status and Message
 // ================================================================================
 type Response struct {
@@ -11,8 +13,11 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT      string = "ROYALTYREPORT"
-	EXPLOITATIONREPORT string = "EXPLOITATIONREPORT"
+	ROYALTYREPORT            string = "ROYALTYREPORT"
+	EXPLOITATIONREPORT       string = "EXPLOITATIONREPORT"
+	HOLDERREPRESENTATION     string = "HOLDERREPRESENTATION"
+	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
+	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
@@ -46,4 +51,56 @@ type RoyaltyReport struct {
 	Territory              string `json:"territory"`
 	UsageType              string `json:"usageType"`
 	Target                 string `json:"target"`
+}
+
+//CopyrightDataReport : struct definition
+type CopyrightDataReport struct {
+	DocType           string        `json:"docType"`
+	CopyrightDataUUID string        `json:"copyrightDataReportUUID"`
+	Isrc              string        `json:"isrc"`
+	SongTitle         string        `json:"songTitle"`
+	StartDate         time.Time     `json:"startDate,string"`
+	EndDate           time.Time     `json:"endDate,string"`
+	RightHolders      []RightHolder `json:"rightHolders"`
+}
+
+//RightHolder : struct definition for copyright data report
+type RightHolder struct {
+	IPI     string `json:"ipi"`
+	Percent int    `json:"percent"`
+}
+
+//OwnerAdministration : struct defining data model for Owner Administration
+type OwnerAdministration struct {
+	DocType                 string           `json:"docType"`
+	OwnerAdministrationUUID string           `json:"ownerAdministrationUUID"`
+	Owner                   string           `json:"owner"`
+	OwnerName               string           `json:"ownerName"`
+	StartDate               string           `json:"startDate"`
+	EndDate                 string           `json:"endDate"`
+	Representations         []Representation `json:"representations"`
+}
+
+//Representation : struct defining data model for Representation
+type Representation struct {
+	Selector           string `json:"selector"`
+	Representative     string `json:"representative"`
+	RepresentativeName string `json:"representativeName"`
+}
+
+//AdministratorAffiliation : struct defining data model for Administrator Affiliation
+type AdministratorAffiliation struct {
+	DocType                      string        `json:"docType"`
+	AdministratorAffiliationUUID string        `json:"administratorAffiliationUUID"`
+	Administrator                string        `json:"administrator"`
+	StartDate                    string        `json:"startDate"`
+	EndDate                      string        `json:"endDate"`
+	Affiliations                 []Affiliation `json:"affiliations"`
+}
+
+//Affiliation : struct defining data model for Affiliation
+type Affiliation struct {
+	Selector      string `json:"selector"`
+	Affiliate     string `json:"affiliate"`
+	AffiliateName string `json:"affiliateName"`
 }

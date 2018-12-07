@@ -82,3 +82,18 @@ func Test_Init(t *testing.T) {
 	// Init
 	checkInit(t, stub, [][]byte{[]byte("init"), []byte("OK")}, nil)
 }
+
+func Test_ResetLedger(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("resetLedger"), []byte(exploitationReportSingle_in)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	//verify # of records in the ledger are 0.
+}
