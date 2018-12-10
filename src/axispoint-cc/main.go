@@ -62,6 +62,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["updateAdministratorAffiliations"] = updateAdministratorAffiliations
 	t.funcMap["getAdministratorAffiliations"] = getAdministratorAffiliations
 	t.funcMap["getRoyaltyStatementsByUUIDs"] = getRoyaltyStatementsByUUIDs
+	t.funcMap["updateRoyaltyStatements"] = updateRoyaltyStatements
 }
 
 // Init - intialize chaincode
