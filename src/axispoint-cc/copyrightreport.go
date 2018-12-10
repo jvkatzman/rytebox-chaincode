@@ -95,14 +95,9 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 		logger.Error(message)
 		return getErrorResponse(message)
 	}
-	inSubQuery := `{"$in":[`
 
-	for _, copyrightDataReportUUID := range args {
-		inSubQuery += fmt.Sprintf("\"%s\",", copyrightDataReportUUID)
-	}
+	inSubQuery := fmt.Sprintf(`{"$in":["%s"]}`, strings.Join(args, "\",\""))
 
-	//remove the last commma and add the remaining closing tags
-	inSubQuery = strings.TrimSuffix(inSubQuery, ",") + "]}"
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":%s}}", COPYRIGHTDATAREPORT, inSubQuery)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
