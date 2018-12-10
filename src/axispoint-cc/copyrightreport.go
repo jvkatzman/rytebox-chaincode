@@ -81,9 +81,9 @@ func addCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string) pb
 	return shim.Success(objBytes)
 }
 
-// getCopyrightDataByIDs - retrieve a copyright data report by id by an array
+// getCopyrightDataReportByID - retrieve a copyright data report by id by an array
 // ================================================================================
-func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	var methodName = "getCopyrightDataReportByIDs"
 	logger.Infof("%s - Begin Execution ", methodName)
@@ -98,7 +98,7 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 
 	inSubQuery := fmt.Sprintf(`{"$in":["%s"]}`, strings.Join(args, "\",\""))
 
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"copyrightDataReportUUID\":%s}}", COPYRIGHTDATAREPORT, inSubQuery)
+	queryString := fmt.Sprintf(`{"selector":{"docType":"%s","copyrightDataReportUUID":%s}}`, COPYRIGHTDATAREPORT, inSubQuery)
 	logger.Infof("%s - executing rich query : %s.", methodName, queryString)
 
 	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
@@ -113,7 +113,7 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 	}
 
 	// we should just have a single item in the result array
-	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports)
+	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports[0])
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
