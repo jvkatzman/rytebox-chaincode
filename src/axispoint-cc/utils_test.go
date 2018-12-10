@@ -6,16 +6,16 @@ import (
 )
 
 // ********************************* Mock Data *********************************
-var exploitationReport_in = `{"source":"M86321","songTitle":"HOLD THE LINE","writerName":"DAVID PAICH","isrc":"00029521","units":156062,"exploitationDate":"201811","amount":"36518.51","usageType":"SDIGM","exploitationReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a4eff","territory":"AUS"}`
-var royaltyReport_in = `{"royaltyReportUUID":"a4c7408b-d68b-499e-8dfa-ff81b43ca8fe","source":"M86321","isrc":"00029521","songTitle":"HOLD THE LINE","writerName":"DAVID PAICH","units":156062,"exploitationDate":"20170131","amount":"7341.31000000","rightType":"SMECH","territory":"AUS","usageType":"SDIGM","target":"M86322"}`
+var exploitationReport_in = `{ "source": "M86321", "songTitle": "LIVING WITH THE LAW", "writerName": "CHRIS WHITLEY", "isrc": "00055521", "units": 456, "exploitationDate": "20170131", "amount": "69.71000000", "usageType": "SDIGM", "exploitationReportUUID": "b6d7a629-85c5-36a6-96fa-8dc3a5f71169", "territory": "AUS" }`
+var royaltyReport_in = `{ "territory": "AUS", "songTitle": "GECKOS!!", "writerName": "KIERAN CASH", "isrc": "00055524", "units": 140, "exploitationDate": "20170131", "amount": "14.094", "usageType": "SDIGP", "source": "M86321", "representative": "PP8819H", "collector": "PP8819H", "rightHolder": "W998", "royaltyStatementUUID": "31f52320-d090-3bc1-935a-b2bc9becb6cb", "rightType": "PERF" }`
 
 // used for positive testing
 var correctSimpleTrueExploitationSelector = "Source == 'M86321'"
 var correctSimpleFalseExploitationSelector = "Isrc == '00000000'"
 var correctTrueExploitationSelectorWithMultipleConjunctions = "Source == 'M86321' && 0 < Units && Units < 200000 && UsageType in ('FOO', 'SDIGM', 'BAR')"
 var correctFalseSelectorWithMultipleConjunctions = "Source == 'M86321' && 0 < Units && Units < 200000 && UsageType in ('FOO', 'BAR', 'BAZ')"
-var correctTrueSelectorWithMultipleLogicalOperators = "(WriterName == 'DAVID PAICH' || Isrc == '00029521') && (SongTitle == 'HOLD THE LINE' || Units > 200000)"
-var correctTrueRoyaltySelector = "Source == 'M86321' && RightType == 'SMECH' && Territory in ('AUS', 'USA', 'GBR')"
+var correctTrueSelectorWithMultipleLogicalOperators = "(WriterName == 'CHRIS WHITLEY' || Isrc == '00055521') && (SongTitle == 'LIVING WITH THE LAW' || Units > 200000)"
+var correctTrueRoyaltySelector = "Source == 'M86321' && RightType == 'PERF' && Territory in ('AUS', 'USA', 'GBR')"
 
 // used for negative testing
 var simpleMissingFieldSelectorWith = "Foo == 'bar'"
@@ -42,7 +42,7 @@ func TestEvaluate_CorrectSelectorMultipleLogicalOperators_ShouldReturnTrue(t *te
 }
 
 func TestEvaluate_CorrectTrueRoyaltySelector_ShouldReturnTrue(t *testing.T) {
-	var royaltyReport = getRoyaltyReport(royaltyReport_in, t)
+	var royaltyReport = getRoyaltyStatement(royaltyReport_in, t)
 	testEval(correctTrueRoyaltySelector, &royaltyReport, false, true, t)
 }
 
@@ -53,7 +53,7 @@ func TestEvaluate_CorrectSelectorContainingExploitationMissingFiled_ShouldReturn
 }
 
 func TestEvaluate_WrongInputs_ShouldReturnError(t *testing.T) {
-	var royaltyReport = getRoyaltyReport(royaltyReport_in, t)
+	var royaltyReport = getRoyaltyStatement(royaltyReport_in, t)
 
 	// test for wrong input asset type (struct instead of a struct pointer)
 	testEval(simpleMissingFieldSelectorWith, royaltyReport, true, nil, t)
@@ -86,8 +86,8 @@ func getExploitationReport(exploitationReportIn string, t *testing.T) Exploitati
 	return exploitationReport
 }
 
-func getRoyaltyReport(royaltyReportIn string, t *testing.T) RoyaltyReport {
-	var royaltyReport = RoyaltyReport{}
+func getRoyaltyStatement(royaltyReportIn string, t *testing.T) RoyaltyStatement {
+	var royaltyReport = RoyaltyStatement{}
 	err := jsonToObject([]byte(royaltyReportIn), &royaltyReport)
 
 	if err != nil {
