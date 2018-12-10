@@ -13,11 +13,11 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT            string = "ROYALTYREPORT"
 	EXPLOITATIONREPORT       string = "EXPLOITATIONREPORT"
 	HOLDERREPRESENTATION     string = "HOLDERREPRESENTATION"
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
+	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
 )
 
 /////////////////////////////////////////////////////
@@ -32,24 +32,24 @@ const (
 
 //ExploitationReport : struct defining data model for Exploitation Reports
 type ExploitationReport struct {
-	DocType                string  `json:"docType"`
-	Source                 string  `json:"source"`
-	SongTitle              string  `json:"songTitle"`
-	WriterName             string  `json:"writerName"`
-	Isrc                   string  `json:"isrc"`
-	Units                  int     `json:"units"`
-	ExploitationDate       string  `json:"exploitationDate"`
-	Amount                 float32 `json:"amount"`
-	UsageType              string  `json:"usageType"`
-	ExploitationReportUUID string  `json:"exploitationReportUUID"`
-	Territory              string  `json:"territory"`
-	State                  string  `json:"state"`
+	DocType                string `json:"docType"`
+	Source                 string `json:"source"`
+	SongTitle              string `json:"songTitle"`
+	WriterName             string `json:"writerName"`
+	Isrc                   string `json:"isrc"`
+	Units                  int    `json:"units"`
+	ExploitationDate       string `json:"exploitationDate"`
+	Amount                 string `json:"amount"`
+	UsageType              string `json:"usageType"`
+	ExploitationReportUUID string `json:"exploitationReportUUID"`
+	Territory              string `json:"territory"`
+	State                  string `json:"state"`
 }
 
-//RoyaltyReport : struct defining data model for Royalty Reports
-type RoyaltyReport struct {
+//RoyaltyStatement : struct defining data model for Royalty Reports
+type RoyaltyStatement struct {
 	DocType                string `json:"docType"`
-	RoyaltyReportUUID      string `json:"royaltyReportUUID"`
+	RoyaltyStatementUUID   string `json:"royaltyStatementUUID"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
 	Source                 string `json:"source"`
 	Isrc                   string `json:"isrc"`
@@ -61,7 +61,10 @@ type RoyaltyReport struct {
 	RightType              string `json:"rightType"`
 	Territory              string `json:"territory"`
 	UsageType              string `json:"usageType"`
-	Target                 string `json:"target"`
+	RightHolder            string `json:"rightHolder"`
+	Administrator          string `json:"administrator"`
+	Collector              string `json:"collector"`
+	State                  string `json:"state"`
 }
 
 //CopyrightDataReport : struct definition
