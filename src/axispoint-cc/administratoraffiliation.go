@@ -132,18 +132,27 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 		return getErrorResponse(err.Error())
 	}
 
-	// Iterate over Exploitation Reports
+	// Iterate over Administrator Affiliations
 	for _, administratorAffiliation := range *administratorAffiliations {
 		administratorAffiliation.DocType = ADMINISTRATORAFFILIATION
 		administratorAffiliationResponse := AdministratorAffiliationResponse{}
 		administratorAffiliationResponse.AdministratorAffiliationUUID = administratorAffiliation.AdministratorAffiliationUUID
 		administratorAffiliationResponse.Success = true
 
-		//Record Exploitation Report on ledger
+		//Record Administrator Affiliation on ledger
 		administratorAffiliationBytes, err := objectToJSON(administratorAffiliation)
 		if err != nil {
 			administratorAffiliationResponse.Success = false
 			administratorAffiliationResponse.Message = err.Error()
+			administratorAffiliationResponses = append(administratorAffiliationResponses, administratorAffiliationResponse)
+			administratorAffiliationOutput.FailureCount++
+			continue
+		}
+
+		administratorAffiliationExistingBytes, err := stub.GetState(administratorAffiliation.AdministratorAffiliationUUID)
+		if administratorAffiliationExistingBytes == nil {
+			administratorAffiliationResponse.Success = false
+			administratorAffiliationResponse.Message = "Administrator Affiliation does not exist!"
 			administratorAffiliationResponses = append(administratorAffiliationResponses, administratorAffiliationResponse)
 			administratorAffiliationOutput.FailureCount++
 			continue

@@ -13,11 +13,21 @@ type Response struct {
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
-	ROYALTYREPORT            string = "ROYALTYREPORT"
 	EXPLOITATIONREPORT       string = "EXPLOITATIONREPORT"
 	HOLDERREPRESENTATION     string = "HOLDERREPRESENTATION"
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
+	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
+)
+
+/////////////////////////////////////////////////////
+// Constant for the Exploitation Report State field values
+/////////////////////////////////////////////////////
+const (
+	INITIAL                      string = "INITIAL"
+	UNKNOWN_RIGHT_HOLDER         string = "UNKNOWN_RIGHT_HOLDER"
+	INCONSISTENT_COPYRIGHT_SPLIT string = "INCONSISTENT_COPYRIGHT_SPLIT"
+	INCOMPLETE_COPYRIGHT_SPLIT   string = "INCOMPLETE_COPYRIGHT_SPLIT"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
@@ -33,12 +43,13 @@ type ExploitationReport struct {
 	UsageType              string `json:"usageType"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
 	Territory              string `json:"territory"`
+	State                  string `json:"state"`
 }
 
-//RoyaltyReport : struct defining data model for Royalty Reports
-type RoyaltyReport struct {
+//RoyaltyStatement : struct defining data model for Royalty Reports
+type RoyaltyStatement struct {
 	DocType                string `json:"docType"`
-	RoyaltyReportUUID      string `json:"royaltyReportUUID"`
+	RoyaltyStatementUUID   string `json:"royaltyStatementUUID"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
 	Source                 string `json:"source"`
 	Isrc                   string `json:"isrc"`
@@ -50,7 +61,10 @@ type RoyaltyReport struct {
 	RightType              string `json:"rightType"`
 	Territory              string `json:"territory"`
 	UsageType              string `json:"usageType"`
-	Target                 string `json:"target"`
+	RightHolder            string `json:"rightHolder"`
+	Administrator          string `json:"administrator"`
+	Collector              string `json:"collector"`
+	State                  string `json:"state"`
 }
 
 //CopyrightDataReport : struct definition
@@ -66,8 +80,9 @@ type CopyrightDataReport struct {
 
 //RightHolder : struct definition for copyright data report
 type RightHolder struct {
-	IPI     string `json:"ipi"`
-	Percent int    `json:"percent"`
+	Selector string `json:"selector"`
+	IPI      string `json:"ipi"`
+	Percent  int    `json:"percent"`
 }
 
 //OwnerAdministration : struct defining data model for Owner Administration

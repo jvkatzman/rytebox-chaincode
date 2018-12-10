@@ -38,9 +38,11 @@ type InvokeFunc func(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 func (t *AxispointChaincode) initFunctionMaps() {
 	t.tableMap = make(map[string]int)
 	t.funcMap = make(map[string]InvokeFunc)
-	t.funcMap["addRoyaltyReports"] = addRoyaltyReports
+	t.funcMap["addRoyaltyStatements"] = addRoyaltyStatements
 	t.funcMap["addExploitationReports"] = addExploitationReports
-	t.funcMap["getRoyaltyDataForPeriod"] = getRoyaltyDataForPeriod
+	t.funcMap["updateExploitationReports"] = updateExploitationReports
+	t.funcMap["getExploitationReports"] = getExploitationReports
+	t.funcMap["getRoyaltyStatements"] = getRoyaltyStatements
 	t.funcMap["resetLedger"] = resetLedger
 	t.funcMap["ping"] = ping
 	t.funcMap["addCopyrightDataReports"] = addCopyrightDataReports
@@ -58,6 +60,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["addAdministratorAffiliations"] = addAdministratorAffiliations
 	t.funcMap["updateAdministratorAffiliations"] = updateAdministratorAffiliations
 	t.funcMap["getAdministratorAffiliations"] = getAdministratorAffiliations
+	t.funcMap["getRoyaltyStatementsByUUIDs"] = getRoyaltyStatementsByUUIDs
 }
 
 // Init - intialize chaincode

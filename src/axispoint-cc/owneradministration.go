@@ -149,6 +149,15 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 			continue
 		}
 
+		ownerAdministrationExistingBytes, err := stub.GetState(ownerAdministration.OwnerAdministrationUUID)
+		if ownerAdministrationExistingBytes == nil {
+			ownerAdministrationResponse.Success = false
+			ownerAdministrationResponse.Message = "Owner Administration does not exist!"
+			ownerAdministrationResponses = append(ownerAdministrationResponses, ownerAdministrationResponse)
+			ownerAdministrationOutput.FailureCount++
+			continue
+		}
+
 		err = stub.PutState(ownerAdministration.OwnerAdministrationUUID, ownerAdministrationBytes)
 		if err != nil {
 			ownerAdministrationResponse.Success = false
