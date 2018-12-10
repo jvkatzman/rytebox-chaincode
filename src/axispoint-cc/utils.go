@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Knetic/govaluate"
+	"reflect"
 	"strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -278,4 +280,42 @@ func getAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response
 
 	//return bytes as result
 	return shim.Success(objectBytes)
+}
+
+/**
+ * Evaluates a parametrized boolean expression. The expression's parameters are sent in a struct instance.
+ *
+ * @param {string} selector - the boolean parametrize expression to evaluate
+ * @param {&struct} asset - a pointer to any struct instance
+ * @return {(boolean, error)} (boolean, error) - the
+ */
+func evaluate(selector string, asset interface{}) (interface{}, error) {
+	if asset == nil || reflect.ValueOf(asset).Kind() != reflect.Ptr || reflect.ValueOf(asset).Elem().Kind() != reflect.Struct {
+		err := errors.New("wrong parameter type: the 'asset' param has to be a struct instance pointer")
+		logger.Error(err)
+		return nil, err
+	}
+
+	val := reflect.ValueOf(asset).Elem()
+	logger.Infof("evaluate selector: %s for struct %s", selector, val.Type())
+
+	parameters := make(map[string]interface{}, 8)
+	for i := 0; i < val.NumField(); i++ {
+		valueField := val.Field(i)
+		typeField := val.Type().Field(i)
+		parameters[typeField.Name] = valueField.Interface()
+	}
+
+	expression, err := govaluate.NewEvaluableExpression(selector)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	result, err := expression.Evaluate(parameters)
+	if err != nil {
+		logger.Error(err)
+	}
+
+	return result, err
 }
