@@ -93,7 +93,7 @@ func getCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []string
 	if len(args) < 1 {
 		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
 		logger.Error(message)
-		return shim.Error(message)
+		return getErrorResponse(message)
 	}
 	inSubQuery := `{"$in":[`
 
@@ -141,7 +141,7 @@ func deleteCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []str
 	if len(args) < 1 {
 		message := fmt.Sprintf("%s - Incorrect number of parameters received.", methodName)
 		logger.Error(message)
-		return shim.Error(message)
+		return getErrorResponse(message)
 	}
 
 	for _, copyrightDataReportUUID := range args {
@@ -156,7 +156,7 @@ func deleteCopyrightDataReportByIDs(stub shim.ChaincodeStubInterface, args []str
 	}
 
 	logger.Infof("%s - successfully deleted %d records.", methodName, deletedRecordCount)
-	return shim.Success([]byte(fmt.Sprintf("deleted %d records.", deletedRecordCount)))
+	return getSuccessResponse(fmt.Sprintf("deleted %d records.", deletedRecordCount))
 }
 
 // searchForCopyrightDataReportWithParameters - search for copyright data report(s)
@@ -175,7 +175,7 @@ func searchForCopyrightDataReportWithParameters(stub shim.ChaincodeStubInterface
 	if len(args) < 1 {
 		message := fmt.Sprintf("%s - incorrect # of arguments received.", methodName)
 		logger.Error(message)
-		return shim.Error(message)
+		return getErrorResponse(message)
 	}
 	var queryString string
 	//expected arguments
@@ -191,7 +191,7 @@ func searchForCopyrightDataReportWithParameters(stub shim.ChaincodeStubInterface
 	default:
 		errMsg := fmt.Sprintf("%s - Failed to determine provided args length. arguments : '%s'.", methodName, strings.Join(args, ","))
 		logger.Errorf(errMsg)
-		return shim.Error(errMsg)
+		return getErrorResponse(errMsg)
 	}
 	logger.Infof("%s - executing couch db query : %s", methodName, queryString)
 	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)

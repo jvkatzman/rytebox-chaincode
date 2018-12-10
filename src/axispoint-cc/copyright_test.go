@@ -113,8 +113,7 @@ func Test_DeleteCopyrightDataReportByIDs(t *testing.T) {
 	}
 
 	//we're expecting to delete a single record
-	expected := "deleted 1 records."
-
+	expected := `{"status":"200","message":"deleted 1 records."}`
 	if !reflect.DeepEqual(expected, string(actual)) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
