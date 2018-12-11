@@ -46,7 +46,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["resetLedger"] = resetLedger
 	t.funcMap["ping"] = ping
 	t.funcMap["addCopyrightDataReports"] = addCopyrightDataReports
-	t.funcMap["getCopyrightDataReportByIDs"] = getCopyrightDataReportByIDs
+	t.funcMap["getCopyrightDataReportByID"] = getCopyrightDataReportByID
 	t.funcMap["deleteCopyrightDataReportByIDs"] = deleteCopyrightDataReportByIDs
 	t.funcMap["updateCopyrightDataReports"] = updateCopyrightDataReports
 	t.funcMap["searchForCopyrightDataReportWithParameters"] = searchForCopyrightDataReportWithParameters

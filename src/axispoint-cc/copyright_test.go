@@ -76,7 +76,7 @@ func Test_GetCopyrightDataReportByID(t *testing.T) {
 	}
 
 	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
-	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByIDs"), []byte(copyrightDataReportUUID)})
+	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByID"), []byte(copyrightDataReportUUID)})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -86,7 +86,7 @@ func Test_GetCopyrightDataReportByID(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	//normalize []string to string
-	if !reflect.DeepEqual("["+expectedReports[0]+"]", string(actualReport)) {
+	if !reflect.DeepEqual(expectedReports[0], string(actualReport)) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
 }
@@ -140,7 +140,7 @@ func Test_updateCopyrightDataReportByIDs(t *testing.T) {
 	}
 
 	getCopyrightDataReportForQueryString = MockGetUpdatedCopyrightDataReport
-	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByIDs"), []byte(copyrightDataReportUUID)})
+	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByID"), []byte(copyrightDataReportUUID)})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -150,7 +150,7 @@ func Test_updateCopyrightDataReportByIDs(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	//normalize []string to string
-	if !reflect.DeepEqual("["+expectedReports[0]+"]", string(actualReport)) {
+	if !reflect.DeepEqual(expectedReports[0], string(actualReport)) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
 }
