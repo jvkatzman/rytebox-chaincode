@@ -1,7 +1,5 @@
 package main
 
-import "time"
-
 // Response -  Object to store Response Status and Message
 // ================================================================================
 type Response struct {
@@ -14,7 +12,7 @@ type Response struct {
 /////////////////////////////////////////////////////
 const (
 	EXPLOITATIONREPORT       string = "EXPLOITATIONREPORT"
-	HOLDERREPRESENTATION     string = "HOLDERREPRESENTATION"
+	OWNERADMINISTRATION      string = "OWNERADMINISTRATION"
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
@@ -28,43 +26,47 @@ const (
 	UNKNOWN_RIGHT_HOLDER         string = "UNKNOWN_RIGHT_HOLDER"
 	INCONSISTENT_COPYRIGHT_SPLIT string = "INCONSISTENT_COPYRIGHT_SPLIT"
 	INCOMPLETE_COPYRIGHT_SPLIT   string = "INCOMPLETE_COPYRIGHT_SPLIT"
+	UNKNOWN                      string = "UNKNOWN"
+	MISSING_COPYRIGHT_HOLDER     string = "MISSING_COPYRIGHT_HOLDER"
+	MISSING_REPRESENTATIVE       string = "MISSING_REPRESENTATIVE"
+	MISSING_AFFILIATE            string = "MISSING_AFFILIATE"
 )
 
 //ExploitationReport : struct defining data model for Exploitation Reports
 type ExploitationReport struct {
-	DocType                string `json:"docType"`
-	Source                 string `json:"source"`
-	SongTitle              string `json:"songTitle"`
-	WriterName             string `json:"writerName"`
-	Isrc                   string `json:"isrc"`
-	Units                  int    `json:"units"`
-	ExploitationDate       string `json:"exploitationDate"`
-	Amount                 string `json:"amount"`
-	UsageType              string `json:"usageType"`
-	ExploitationReportUUID string `json:"exploitationReportUUID"`
-	Territory              string `json:"territory"`
-	State                  string `json:"state"`
+	DocType                string  `json:"docType"`
+	Source                 string  `json:"source"`
+	SongTitle              string  `json:"songTitle"`
+	WriterName             string  `json:"writerName"`
+	Isrc                   string  `json:"isrc"`
+	Units                  int     `json:"units"`
+	ExploitationDate       string  `json:"exploitationDate"`
+	Amount                 float64 `json:"amount"`
+	UsageType              string  `json:"usageType"`
+	ExploitationReportUUID string  `json:"exploitationReportUUID"`
+	Territory              string  `json:"territory"`
+	State                  string  `json:"state"`
 }
 
 //RoyaltyStatement : struct defining data model for Royalty Reports
 type RoyaltyStatement struct {
-	DocType                string `json:"docType"`
-	RoyaltyStatementUUID   string `json:"royaltyStatementUUID"`
-	ExploitationReportUUID string `json:"exploitationReportUUID"`
-	Source                 string `json:"source"`
-	Isrc                   string `json:"isrc"`
-	SongTitle              string `json:"songTitle"`
-	WriterName             string `json:"writerName"`
-	Units                  int    `json:"units"`
-	ExploitationDate       string `json:"exploitationDate"`
-	Amount                 string `json:"amount"`
-	RightType              string `json:"rightType"`
-	Territory              string `json:"territory"`
-	UsageType              string `json:"usageType"`
-	RightHolder            string `json:"rightHolder"`
-	Administrator          string `json:"administrator"`
-	Collector              string `json:"collector"`
-	State                  string `json:"state"`
+	DocType                string  `json:"docType"`
+	RoyaltyStatementUUID   string  `json:"royaltyStatementUUID"`
+	ExploitationReportUUID string  `json:"exploitationReportUUID"`
+	Source                 string  `json:"source"`
+	Isrc                   string  `json:"isrc"`
+	SongTitle              string  `json:"songTitle"`
+	WriterName             string  `json:"writerName"`
+	Units                  int     `json:"units"`
+	ExploitationDate       string  `json:"exploitationDate"`
+	Amount                 float64 `json:"amount"`
+	RightType              string  `json:"rightType"`
+	Territory              string  `json:"territory"`
+	UsageType              string  `json:"usageType"`
+	RightHolder            string  `json:"rightHolder"`
+	Administrator          string  `json:"administrator"`
+	Collector              string  `json:"collector"`
+	State                  string  `json:"state"`
 }
 
 //CopyrightDataReport : struct definition
@@ -73,16 +75,16 @@ type CopyrightDataReport struct {
 	CopyrightDataUUID string        `json:"copyrightDataReportUUID"`
 	Isrc              string        `json:"isrc"`
 	SongTitle         string        `json:"songTitle"`
-	StartDate         time.Time     `json:"startDate,string"`
-	EndDate           time.Time     `json:"endDate,string"`
+	StartDate         string        `json:"startDate"`
+	EndDate           string        `json:"endDate"`
 	RightHolders      []RightHolder `json:"rightHolders"`
 }
 
 //RightHolder : struct definition for copyright data report
 type RightHolder struct {
-	Selector string `json:"selector"`
-	IPI      string `json:"ipi"`
-	Percent  int    `json:"percent"`
+	Selector string  `json:"selector"`
+	IPI      string  `json:"ipi"`
+	Percent  float64 `json:"percent"`
 }
 
 //OwnerAdministration : struct defining data model for Owner Administration

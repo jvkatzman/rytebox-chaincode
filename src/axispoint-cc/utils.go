@@ -20,9 +20,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Knetic/govaluate"
+	"math"
 	"reflect"
 	"strings"
+	"time"
+
+	"github.com/Knetic/govaluate"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -282,14 +285,8 @@ func getAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	return shim.Success(objectBytes)
 }
 
-/**
- * Evaluates a parametrized boolean expression. The expression's parameters are sent in a struct instance.
- *
- * @param {string} selector - the boolean parametrize expression to evaluate
- * @param {&struct} asset - a pointer to any struct instance
- * @return {(boolean, error)} (boolean, error) - the
- */
-func evaluate(selector string, asset interface{}) (interface{}, error) {
+//getEvaluableParameters - Returns the struct parameters using reflect
+func getEvaluableParameters(asset interface{}) (map[string]interface{}, error) {
 	if asset == nil || reflect.ValueOf(asset).Kind() != reflect.Ptr || reflect.ValueOf(asset).Elem().Kind() != reflect.Struct {
 		err := errors.New("wrong parameter type: the 'asset' param has to be a struct instance pointer")
 		logger.Error(err)
@@ -297,7 +294,7 @@ func evaluate(selector string, asset interface{}) (interface{}, error) {
 	}
 
 	val := reflect.ValueOf(asset).Elem()
-	logger.Infof("evaluate selector: %s for struct %s", selector, val.Type())
+	logger.Infof("getEvaluableParameters or struct %s", val.Type())
 
 	parameters := make(map[string]interface{}, 8)
 	for i := 0; i < val.NumField(); i++ {
@@ -306,7 +303,14 @@ func evaluate(selector string, asset interface{}) (interface{}, error) {
 		parameters[typeField.Name] = valueField.Interface()
 	}
 
+	return parameters, nil
+}
+
+//evaluate - Evaluates the selector againist the parameters and returns true/false
+func evaluate(selector string, parameters map[string]interface{}) (interface{}, error) {
+	logger.Infof("evaluate selector: %s", selector)
 	expression, err := govaluate.NewEvaluableExpression(selector)
+
 	if err != nil {
 		logger.Error(err)
 		return nil, err
@@ -318,4 +322,34 @@ func evaluate(selector string, asset interface{}) (interface{}, error) {
 	}
 
 	return result, err
+}
+
+// inTimeRange - Return true/false if the target datetime range is with in the specifed datetime range
+func inTimeRange(day1, day2, day3, day4 string) bool {
+	t1, _ := time.Parse(time.RFC3339, day1) //start
+	t2, _ := time.Parse(time.RFC3339, day2) //end
+	t3, _ := time.Parse(time.RFC3339, day3) //target.start
+	t4, _ := time.Parse(time.RFC3339, day4) //target.end
+
+	return (((t1.Before(t3) || t1.Equal(t3)) && (t2.After(t3) || t2.Equal(t3))) ||
+		((t1.Before(t4) || t1.Equal(t4)) && (t2.After(t4) || t2.Equal(t4))) ||
+		((t1.After(t3) || t1.Equal(t3)) && (t2.Before(t4) || t2.Equal(t4))))
+}
+
+// IsDateInTimeRange - Return true/false if the target datetime is with in the specifed datetime range
+func IsDateInTimeRange(day1, day2, day3 string) bool {
+	t1, _ := time.Parse(time.RFC3339, day1) //target
+	t2, _ := time.Parse(time.RFC3339, day2) //start
+	t3, _ := time.Parse(time.RFC3339, day3) //end
+
+	return (t1.After(t2) || t1.Equal(t2)) && (t1.Before(t3) || t1.Equal(t3))
+}
+
+func round(num float64) int {
+	return int(num + math.Copysign(0.5, num))
+}
+
+func toFixed(num float64, precision int) float64 {
+	output := math.Pow(10, float64(precision))
+	return float64(round(num*output)) / output
 }

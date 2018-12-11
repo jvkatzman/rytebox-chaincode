@@ -113,6 +113,9 @@ func getCopyrightDataReportByID(stub shim.ChaincodeStubInterface, args []string)
 	}
 
 	// we should just have a single item in the result array
+	if len(resultCopyrightReports) == 0 {
+		return getErrorResponse(fmt.Sprintf("UUID: %s does not exist", args[0]))
+	}
 	copyrightReportResultBytes, err := objectToJSON(resultCopyrightReports[0])
 	if err != nil {
 		return getErrorResponse(err.Error())
@@ -221,15 +224,7 @@ func getAllCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string)
 		queryString = args[0]
 	}
 
-	logger.Info("%s - executing rich query : %s.", methodName, queryString)
-
-	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	var resultCopyrightDataReports []CopyrightDataReport
-	err = sliceToStruct(queryResult, &resultCopyrightDataReports)
+	resultCopyrightDataReports, err := queryCopyrightDataReports(stub, queryString)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
@@ -242,6 +237,28 @@ func getAllCopyrightDataReports(stub shim.ChaincodeStubInterface, args []string)
 
 	//return bytes as result
 	return shim.Success(queryResultBytes)
+}
+
+//queryCopyrightDataReports: query copyright data reports by rich query
+func queryCopyrightDataReports(stub shim.ChaincodeStubInterface, queryString string) ([]CopyrightDataReport, error) {
+	var methodName = "queryCopyrightDataReports"
+	logger.Infof("%s - Begin Execution ", methodName)
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	logger.Info("%s - executing rich query : %s.", methodName, queryString)
+
+	queryResult, err := getCopyrightDataReportForQueryString(stub, queryString)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	var resultCopyrightDataReports []CopyrightDataReport
+	err = sliceToStruct(queryResult, &resultCopyrightDataReports)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	return resultCopyrightDataReports, nil
 }
 
 // updateCopyrightDataReports function contains business logic to update

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -49,7 +50,7 @@ func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 
 	// Iterate over Exploitation Reports
 	for _, ownerAdministration := range *ownerAdministrations {
-		ownerAdministration.DocType = HOLDERREPRESENTATION
+		ownerAdministration.DocType = OWNERADMINISTRATION
 		ownerAdministrationResponse := OwnerAdministrationResponse{}
 		ownerAdministrationResponse.OwnerAdministrationUUID = ownerAdministration.OwnerAdministrationUUID
 		ownerAdministrationResponse.Success = true
@@ -134,7 +135,7 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 
 	// Iterate over Exploitation Reports
 	for _, ownerAdministration := range *ownerAdministrations {
-		ownerAdministration.DocType = HOLDERREPRESENTATION
+		ownerAdministration.DocType = OWNERADMINISTRATION
 		ownerAdministrationResponse := OwnerAdministrationResponse{}
 		ownerAdministrationResponse.OwnerAdministrationUUID = ownerAdministration.OwnerAdministrationUUID
 		ownerAdministrationResponse.Success = true
@@ -184,20 +185,12 @@ func getOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 	var methodName = "getOwnerAdministrations"
 	logger.Info("ENTERING >", methodName, args)
 
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", HOLDERREPRESENTATION)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", OWNERADMINISTRATION)
 	if len(args) == 1 {
 		queryString = args[0]
 	}
 
-	logger.Info("%s - executing rich query : %s.", methodName, queryString)
-
-	queryResult, err := getOwnerAdministrationsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	var resultOwnerAdministrations []OwnerAdministration
-	err = sliceToStruct(queryResult, &resultOwnerAdministrations)
+	resultOwnerAdministrations, err := queryOwnerAdministrations(stub, queryString)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
@@ -210,4 +203,25 @@ func getOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 
 	//return bytes as result
 	return shim.Success(queryResultBytes)
+}
+
+//queryOwnerAdministrations: queryet owner administrations
+func queryOwnerAdministrations(stub shim.ChaincodeStubInterface, queryString string) ([]OwnerAdministration, error) {
+	var methodName = "queryOwnerAdministrations"
+	logger.Info("ENTERING >", methodName)
+	logger.Info("%s - executing rich query : %s.", methodName, queryString)
+
+	queryResult, err := getOwnerAdministrationsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	var resultOwnerAdministrations []OwnerAdministration
+	err = sliceToStruct(queryResult, &resultOwnerAdministrations)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	//return bytes as result
+	return resultOwnerAdministrations, nil
 }

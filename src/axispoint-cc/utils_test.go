@@ -6,8 +6,8 @@ import (
 )
 
 // ********************************* Mock Data *********************************
-var exploitationReport_in = `{ "source": "M86321", "songTitle": "LIVING WITH THE LAW", "writerName": "CHRIS WHITLEY", "isrc": "00055521", "units": 456, "exploitationDate": "20170131", "amount": "69.71000000", "usageType": "SDIGM", "exploitationReportUUID": "b6d7a629-85c5-36a6-96fa-8dc3a5f71169", "territory": "AUS" }`
-var royaltyReport_in = `{ "territory": "AUS", "songTitle": "GECKOS!!", "writerName": "KIERAN CASH", "isrc": "00055524", "units": 140, "exploitationDate": "20170131", "amount": "14.094", "usageType": "SDIGP", "source": "M86321", "representative": "PP8819H", "collector": "PP8819H", "rightHolder": "W998", "royaltyStatementUUID": "31f52320-d090-3bc1-935a-b2bc9becb6cb", "rightType": "PERF" }`
+var exploitationReport_in = `{ "source": "M86321", "songTitle": "LIVING WITH THE LAW", "writerName": "CHRIS WHITLEY", "isrc": "00055521", "units": 456, "exploitationDate": "20170131", "amount": 69.71000000, "usageType": "SDIGM", "exploitationReportUUID": "b6d7a629-85c5-36a6-96fa-8dc3a5f71169", "territory": "AUS" }`
+var royaltyReport_in = `{ "territory": "AUS", "songTitle": "GECKOS!!", "writerName": "KIERAN CASH", "isrc": "00055524", "units": 140, "exploitationDate": "20170131", "amount": 14.094, "usageType": "SDIGP", "source": "M86321", "representative": "PP8819H", "collector": "PP8819H", "rightHolder": "W998", "royaltyStatementUUID": "31f52320-d090-3bc1-935a-b2bc9becb6cb", "rightType": "PERF" }`
 
 // used for positive testing
 var correctSimpleTrueExploitationSelector = "Source == 'M86321'"
@@ -102,7 +102,8 @@ func testEval(selector string, asset interface{}, isErrExpected bool, expectedRe
 		t.Fatalf("The expected result cannot be nil if no err is expected")
 	}
 
-	result, err := evaluate(selector, asset)
+	parameters, _ := getEvaluableParameters(asset)
+	result, err := evaluate(selector, parameters)
 	fmt.Println("Evaluate result =", result)
 	fmt.Println("Evaluate error =", err)
 

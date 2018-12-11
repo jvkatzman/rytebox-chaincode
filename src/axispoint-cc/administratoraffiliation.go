@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -189,15 +190,7 @@ func getAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 		queryString = args[0]
 	}
 
-	logger.Info("%s - executing rich query : %s.", methodName, queryString)
-
-	queryResult, err := getAdministratorAffiliationsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	var resultAdministratorAffiliations []AdministratorAffiliation
-	err = sliceToStruct(queryResult, &resultAdministratorAffiliations)
+	resultAdministratorAffiliations, err := queryAdministratorAffiliations(stub, queryString)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
@@ -210,4 +203,26 @@ func getAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 
 	//return bytes as result
 	return shim.Success(queryResultBytes)
+}
+
+//queryAdministratorAffiliations: query administrator affiliations
+func queryAdministratorAffiliations(stub shim.ChaincodeStubInterface, queryString string) ([]AdministratorAffiliation, error) {
+	var methodName = "queryAdministratorAffiliations"
+	logger.Info("ENTERING >", methodName)
+
+	logger.Info("%s - executing rich query : %s.", methodName, queryString)
+
+	queryResult, err := getAdministratorAffiliationsForQueryString(stub, queryString) //getQueryResultInBytes(stub, queryString)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	var resultAdministratorAffiliations []AdministratorAffiliation
+	err = sliceToStruct(queryResult, &resultAdministratorAffiliations)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	//return bytes as result
+	return resultAdministratorAffiliations, nil
 }
