@@ -20,9 +20,9 @@ var royaltyReportMultiple2_in = `[{"royaltyStatementUUID":"a4c7408b-d68b-499e-8d
 // *****************************************************************************
 func MockGetExploitationReportQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
 	if strings.Contains(queryString, "00029521") {
-		return []string{`{"docType":"EXPLOITATIONREPORT","source":"M86321","songTitle":"HOLD THE LINE","writerName":"DAVID PAICH","isrc":"00029521","units":156062,"exploitationDate":"201811","amount":"36518.51","usageType":"SDIGM","exploitationReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a4eff","territory":"AUS"}`}, nil
+		return []string{`{"docType":"EXPLOITATIONREPORT","source":"P8819H","songTitle":"HOLD THE LINE","writerName":"DAVID PAICH","isrc":"00029521","units":203,"exploitationDate":"20170131","amount":32.99,"usageType":"SDIGM","exploitationReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a4eff","territory":"AUS","state":"INITIAL"}`}, nil
 	} else if strings.Contains(queryString, "00029522") {
-		return []string{`{"docType":"EXPLOITATIONREPORT","source":"M86321","songTitle":"HOLD THE LINE","writerName":"DAVID PAICH","isrc":"00029522","units":156062,"exploitationDate":"201811","amount":"36518.51","usageType":"SDIGM","exploitationReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a4eff","territory":"AUS"}`}, nil
+		return []string{`{"docType":"EXPLOITATIONREPORT","source":"M86321","songTitle":"HOLD THE LINE","writerName":"DAVID PAICH","isrc":"00029522","units":156062,"exploitationDate":"201811","amount":36518.51,"usageType":"SDIGM","exploitationReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a4eff","territory":"AUS","state":"INITIAL"}`}, nil
 	}
 	return nil, nil
 }
