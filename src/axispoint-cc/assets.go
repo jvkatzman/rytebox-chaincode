@@ -32,6 +32,14 @@ const (
 	MISSING_AFFILIATE            string = "MISSING_AFFILIATE"
 )
 
+/////////////////////////////////////////////////////
+// Constant for the Royalty Report Right Type
+/////////////////////////////////////////////////////
+const (
+	OWNERSHIP  string = "OWNERSHIP"
+	COLLECTION string = "COLLECTION"
+)
+
 //ExploitationReport : struct defining data model for Exploitation Reports
 type ExploitationReport struct {
 	DocType                string  `json:"docType"`
