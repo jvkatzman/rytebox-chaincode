@@ -34,9 +34,9 @@ type RoyaltyStatementResponse struct {
 
 // RoyaltyStatementOutput : defines accumulated output of blockchain requests
 type RoyaltyStatementOutput struct {
-	SuccessCount     int                        `json:"successCount"`
-	FailureCount     int                        `json:"failureCount"`
-	RoyaltyStatement []RoyaltyStatementResponse `json:"royaltyStatement"`
+	SuccessCount      int                        `json:"successCount"`
+	FailureCount      int                        `json:"failureCount"`
+	RoyaltyStatements []RoyaltyStatementResponse `json:"royaltyStatements"`
 }
 
 // getExploitationReportForQueryString : Get exploitation reports based on Song Title, Song Writer, ISRC, Exploitation Date and Territory
@@ -111,7 +111,7 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 		}
 	}
 
-	royaltyStatementOutput.RoyaltyStatement = royaltyStatementResponses
+	royaltyStatementOutput.RoyaltyStatements = royaltyStatementResponses
 
 	objBytes, _ := objectToJSON(royaltyStatementOutput)
 	logger.Info("EXITING <", methodName, royaltyStatementOutput)
@@ -275,7 +275,7 @@ func updateRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb
 		}
 	}
 
-	royaltyStatementsOutput.RoyaltyStatement = royaltyStatementResponses
+	royaltyStatementsOutput.RoyaltyStatements = royaltyStatementResponses
 
 	objBytes, _ := objectToJSON(royaltyStatementsOutput)
 	logger.Info("EXITING <", methodName, royaltyStatementsOutput)
