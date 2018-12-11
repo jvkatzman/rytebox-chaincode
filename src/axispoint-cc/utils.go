@@ -336,8 +336,8 @@ func inTimeRange(day1, day2, day3, day4 string) bool {
 		((t1.After(t3) || t1.Equal(t3)) && (t2.Before(t4) || t2.Equal(t4))))
 }
 
-// IsDateInTimeRange - Return true/false if the target datetime is with in the specifed datetime range
-func IsDateInTimeRange(day1, day2, day3 string) bool {
+// isDateInTimeRange - Return true/false if the target datetime is with in the specifed datetime range
+func isDateInTimeRange(day1, day2, day3 string) bool {
 	t1, _ := time.Parse(time.RFC3339, day1) //target
 	t2, _ := time.Parse(time.RFC3339, day2) //start
 	t3, _ := time.Parse(time.RFC3339, day3) //end

@@ -10,13 +10,12 @@ import (
 
 var getOwnerAdministrationsForQueryString = getObjectByQueryFromLedger
 
-// AddOwnerAdministrations function contains business logic to insert new
-// Owner Administrations to the Ledger
-/*
+/* addOwnerAdministrations function contains business logic to insert new
+Owner Administrations to the Ledger
 * @params   {Array} args
 * @property {string} 0       - stringified JSON array of owner administration.
 * @return   {pb.Response}    - peer Response
- */
+*/
 func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "addOwnerAdministrations"
 	logger.Info("ENTERING >", methodName, args)
@@ -33,7 +32,7 @@ func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 		OwnerAdministrations []OwnerAdministrationResponse `json:"ownerAdministrations"`
 	}
 
-	//Check if array length is greater than 0
+	// check if array length is greater than 0
 	if len(args) < 1 {
 		return getErrorResponse("Missing arguments: Array of Owner Administration objects is required")
 	}
@@ -42,20 +41,20 @@ func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 	ownerAdministrations := &[]OwnerAdministration{}
 	ownerAdministrationResponses := []OwnerAdministrationResponse{}
 
-	//Unmarshal the args input to an array of owner administration records
+	// Unmarshal the args input to an array of owner administration records
 	err := jsonToObject([]byte(args[0]), ownerAdministrations)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 
-	// Iterate over Exploitation Reports
+	// iterate over owner administrations
 	for _, ownerAdministration := range *ownerAdministrations {
 		ownerAdministration.DocType = OWNERADMINISTRATION
 		ownerAdministrationResponse := OwnerAdministrationResponse{}
 		ownerAdministrationResponse.OwnerAdministrationUUID = ownerAdministration.OwnerAdministrationUUID
 		ownerAdministrationResponse.Success = true
 
-		//Record Exploitation Report on ledger
+		// convert owner administration to bytes
 		ownerAdministrationBytes, err := objectToJSON(ownerAdministration)
 		if err != nil {
 			ownerAdministrationResponse.Success = false
@@ -65,6 +64,7 @@ func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 			continue
 		}
 
+		// check if owner administration with the UUID exists on the ledger.
 		ownerAdministrationExistingBytes, err := stub.GetState(ownerAdministration.OwnerAdministrationUUID)
 		if ownerAdministrationExistingBytes != nil {
 			ownerAdministrationResponse.Success = false
@@ -74,6 +74,7 @@ func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 			continue
 		}
 
+		// add owner administration to the ledger
 		err = stub.PutState(ownerAdministration.OwnerAdministrationUUID, ownerAdministrationBytes)
 		if err != nil {
 			ownerAdministrationResponse.Success = false
@@ -95,13 +96,12 @@ func addOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 	return shim.Success(objBytes)
 }
 
-// updateOwnerAdministrations function contains business logic to update
-// Owner Administrations on the Ledger
-/*
+/* updateOwnerAdministrations function contains business logic to update
+Owner Administrations on the Ledger
 * @params   {Array} args
 * @property {string} 0       - stringified JSON array of owner administration.
 * @return   {pb.Response}    - peer Response
- */
+*/
 func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "updateOwnerAdministrations"
 	logger.Info("ENTERING >", methodName, args)
@@ -118,7 +118,7 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 		OwnerAdministrations []OwnerAdministrationResponse `json:"ownerAdministrations"`
 	}
 
-	//Check if array length is greater than 0
+	// check if array length is greater than 0
 	if len(args) < 1 {
 		return getErrorResponse("Missing arguments: Array of Owner Administration objects is required")
 	}
@@ -127,20 +127,20 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 	ownerAdministrations := &[]OwnerAdministration{}
 	ownerAdministrationResponses := []OwnerAdministrationResponse{}
 
-	//Unmarshal the args input to an array of owner administration records
+	// unmarshal the args input to an array of owner administration records
 	err := jsonToObject([]byte(args[0]), ownerAdministrations)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 
-	// Iterate over Exploitation Reports
+	// iterate over owner administrations
 	for _, ownerAdministration := range *ownerAdministrations {
 		ownerAdministration.DocType = OWNERADMINISTRATION
 		ownerAdministrationResponse := OwnerAdministrationResponse{}
 		ownerAdministrationResponse.OwnerAdministrationUUID = ownerAdministration.OwnerAdministrationUUID
 		ownerAdministrationResponse.Success = true
 
-		//Record Exploitation Report on ledger
+		// convert owner administration to bytes
 		ownerAdministrationBytes, err := objectToJSON(ownerAdministration)
 		if err != nil {
 			ownerAdministrationResponse.Success = false
@@ -150,6 +150,7 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 			continue
 		}
 
+		// check if owner administration with the UUID exists on the ledger.
 		ownerAdministrationExistingBytes, err := stub.GetState(ownerAdministration.OwnerAdministrationUUID)
 		if ownerAdministrationExistingBytes == nil {
 			ownerAdministrationResponse.Success = false
@@ -159,6 +160,7 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 			continue
 		}
 
+		// update owner administration on the ledger
 		err = stub.PutState(ownerAdministration.OwnerAdministrationUUID, ownerAdministrationBytes)
 		if err != nil {
 			ownerAdministrationResponse.Success = false
@@ -180,7 +182,12 @@ func updateOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string)
 	return shim.Success(objBytes)
 }
 
-//getOwnerAdministrations: get owner administrations
+/* getOwnerAdministrations function contains business logic to get
+Owner Administrations based on the rich query selector
+* @params   {Array} args
+* @property {string} 0       - rich query selector.
+* @return   {pb.Response}    - peer Response
+*/
 func getOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "getOwnerAdministrations"
 	logger.Info("ENTERING >", methodName, args)
@@ -190,6 +197,7 @@ func getOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 		queryString = args[0]
 	}
 
+	// get owner adminisitrations based on the rich query selector
 	resultOwnerAdministrations, err := queryOwnerAdministrations(stub, queryString)
 	if err != nil {
 		return getErrorResponse(err.Error())
@@ -205,7 +213,11 @@ func getOwnerAdministrations(stub shim.ChaincodeStubInterface, args []string) pb
 	return shim.Success(queryResultBytes)
 }
 
-//queryOwnerAdministrations: queryet owner administrations
+/* queryOwnerAdministrations function contains business logic to get
+Owner Administrations based on the rich query selector
+* @params 	{string}      				- rich query selector.
+* @return   {[]OwnerAdministration}    	- array of owner administrations
+*/
 func queryOwnerAdministrations(stub shim.ChaincodeStubInterface, queryString string) ([]OwnerAdministration, error) {
 	var methodName = "queryOwnerAdministrations"
 	logger.Info("ENTERING >", methodName)

@@ -10,13 +10,12 @@ import (
 
 var getAdministratorAffiliationsForQueryString = getObjectByQueryFromLedger
 
-// AddAdministratorAffiliations function contains business logic to insert new
-// Administrator Affiliations to the Ledger
-/*
+/* addAdministratorAffiliations function contains business logic to insert new
+Administrator Affiliations to the Ledger
 * @params   {Array} args
 * @property {string} 0       - stringified JSON array of administrator affiliation.
 * @return   {pb.Response}    - peer Response
- */
+*/
 func addAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "addAdministratorAffiliations"
 	logger.Info("ENTERING >", methodName, args)
@@ -33,7 +32,7 @@ func addAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 		AdministratorAffiliations []AdministratorAffiliationResponse `json:"administratorAffiliations"`
 	}
 
-	//Check if array length is greater than 0
+	// check if array length is greater than 0
 	if len(args) < 1 {
 		return getErrorResponse("Missing arguments: Array of Administrator Affiliation objects is required")
 	}
@@ -42,20 +41,20 @@ func addAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 	administratorAffiliations := &[]AdministratorAffiliation{}
 	administratorAffiliationResponses := []AdministratorAffiliationResponse{}
 
-	//Unmarshal the args input to an array of administrator affiliation records
+	// Unmarshal the args input to an array of administrator affiliation records
 	err := jsonToObject([]byte(args[0]), administratorAffiliations)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 
-	// Iterate over Exploitation Reports
+	// iterate over administrator affiliations
 	for _, administratorAffiliation := range *administratorAffiliations {
 		administratorAffiliation.DocType = ADMINISTRATORAFFILIATION
 		administratorAffiliationResponse := AdministratorAffiliationResponse{}
 		administratorAffiliationResponse.AdministratorAffiliationUUID = administratorAffiliation.AdministratorAffiliationUUID
 		administratorAffiliationResponse.Success = true
 
-		//Record Exploitation Report on ledger
+		// convert administrator affiliation to bytes
 		administratorAffiliationBytes, err := objectToJSON(administratorAffiliation)
 		if err != nil {
 			administratorAffiliationResponse.Success = false
@@ -65,6 +64,7 @@ func addAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 			continue
 		}
 
+		// check if administrator affiliation with the UUID exists on the ledger.
 		administratorAffiliationExistingBytes, err := stub.GetState(administratorAffiliation.AdministratorAffiliationUUID)
 		if administratorAffiliationExistingBytes != nil {
 			administratorAffiliationResponse.Success = false
@@ -74,6 +74,7 @@ func addAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 			continue
 		}
 
+		// add administrator affiliation to the ledger
 		err = stub.PutState(administratorAffiliation.AdministratorAffiliationUUID, administratorAffiliationBytes)
 		if err != nil {
 			administratorAffiliationResponse.Success = false
@@ -95,13 +96,12 @@ func addAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 	return shim.Success(objBytes)
 }
 
-// updateAdministratorAffiliations function contains business logic to update
-// Administrator Affiliations on the Ledger
-/*
+/* updateAdministratorAffiliations function contains business logic to update
+Administrator Affiliations on the Ledger
 * @params   {Array} args
 * @property {string} 0       - stringified JSON array of administrator affiliation.
 * @return   {pb.Response}    - peer Response
- */
+*/
 func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "updateAdministratorAffiliations"
 	logger.Info("ENTERING >", methodName, args)
@@ -118,7 +118,7 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 		AdministratorAffiliations []AdministratorAffiliationResponse `json:"administratorAffiliations"`
 	}
 
-	//Check if array length is greater than 0
+	// check if array length is greater than 0
 	if len(args) < 1 {
 		return getErrorResponse("Missing arguments: Array of Administrator Affiliation objects is required")
 	}
@@ -127,20 +127,20 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 	administratorAffiliations := &[]AdministratorAffiliation{}
 	administratorAffiliationResponses := []AdministratorAffiliationResponse{}
 
-	//Unmarshal the args input to an array of administrator affiliation records
+	// unmarshal the args input to an array of administrator affiliation records
 	err := jsonToObject([]byte(args[0]), administratorAffiliations)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 
-	// Iterate over Administrator Affiliations
+	// iterate over administrator affiliations
 	for _, administratorAffiliation := range *administratorAffiliations {
 		administratorAffiliation.DocType = ADMINISTRATORAFFILIATION
 		administratorAffiliationResponse := AdministratorAffiliationResponse{}
 		administratorAffiliationResponse.AdministratorAffiliationUUID = administratorAffiliation.AdministratorAffiliationUUID
 		administratorAffiliationResponse.Success = true
 
-		//Record Administrator Affiliation on ledger
+		// convert administrator affiliation to bytes
 		administratorAffiliationBytes, err := objectToJSON(administratorAffiliation)
 		if err != nil {
 			administratorAffiliationResponse.Success = false
@@ -150,6 +150,7 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 			continue
 		}
 
+		// check if administrator affiliation with the UUID exists on the ledger.
 		administratorAffiliationExistingBytes, err := stub.GetState(administratorAffiliation.AdministratorAffiliationUUID)
 		if administratorAffiliationExistingBytes == nil {
 			administratorAffiliationResponse.Success = false
@@ -159,6 +160,7 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 			continue
 		}
 
+		// update administrator affiliation on the ledger
 		err = stub.PutState(administratorAffiliation.AdministratorAffiliationUUID, administratorAffiliationBytes)
 		if err != nil {
 			administratorAffiliationResponse.Success = false
@@ -180,7 +182,12 @@ func updateAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []st
 	return shim.Success(objBytes)
 }
 
-//getAdministratorAffiliations: get administrator affiliations
+/* getAdministratorAffiliations function contains business logic to get
+Administrator Affiliations based on the rich query selector
+* @params   {Array} args
+* @property {string} 0       - rich query selector.
+* @return   {pb.Response}    - peer Response
+*/
 func getAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "getAdministratorAffiliations"
 	logger.Info("ENTERING >", methodName, args)
@@ -190,6 +197,7 @@ func getAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 		queryString = args[0]
 	}
 
+	// get owner adminisitrations based on the rich query selector
 	resultAdministratorAffiliations, err := queryAdministratorAffiliations(stub, queryString)
 	if err != nil {
 		return getErrorResponse(err.Error())
@@ -205,7 +213,11 @@ func getAdministratorAffiliations(stub shim.ChaincodeStubInterface, args []strin
 	return shim.Success(queryResultBytes)
 }
 
-//queryAdministratorAffiliations: query administrator affiliations
+/* queryAdministratorAffiliations function contains business logic to get
+Administrator Affiliations based on the rich query selector
+* @params 	{string}      				- rich query selector.
+* @return   {[]AdministratorAffiliation}    	- array of administrator affiliations
+*/
 func queryAdministratorAffiliations(stub shim.ChaincodeStubInterface, queryString string) ([]AdministratorAffiliation, error) {
 	var methodName = "queryAdministratorAffiliations"
 	logger.Info("ENTERING >", methodName)
