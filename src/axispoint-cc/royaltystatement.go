@@ -177,42 +177,6 @@ func getRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	return shim.Success(queryResultBytes)
 }
 
-//update royalty data based on UUID and field data
-//expected parameters: UUID key and updated json record
-func updateRoyaltyStatement(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "updateRoyaltyStatements"
-	logger.Infof("%s - Begin Execution ", methodName)
-	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
-	defer logger.Infof("%s - End Execution ", methodName)
-
-	//check for proper # of args
-	if len(args) < 2 {
-		errMsg := fmt.Sprintf("%s - Incorrect number of parameters provided : %s.  Expecting UUID and new ReportStatement.", methodName, strings.Join(args, ","))
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
-	}
-
-	//pull out arguments
-	keyUUID := args[0]
-	royaltyStatementJSON := args[1]
-
-	//get the record to validate the UUID
-	resultBytes, err := stub.GetState(keyUUID)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	royaltyStatement := RoyaltyStatement{}
-	//convert from bytes to object
-	err = jsonToObject([]byte(royaltyStatementJSON), royaltyStatement)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	//return bytes as result
-	return shim.Success(resultBytes)
-}
-
 // getRoyaltyStatementsByUUID - retrieve royalty statements by id in an array
 // ================================================================================
 func getRoyaltyStatementsByUUIDs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -260,26 +224,75 @@ func getRoyaltyStatementsByUUIDs(stub shim.ChaincodeStubInterface, args []string
 	return shim.Success(royaltyStatementResultBytes)
 }
 
-//delete royalty data based on UUID
-//expected parameters: UUID
-func deleteRoyaltyStatement(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "deleteRoyaltyStatements"
-	logger.Infof("%s - Begin Execution ", methodName)
-	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
-	defer logger.Infof("%s - End Execution ", methodName)
+// updateRoyaltyStatements function contains business logic to update
+// Royalty Statements on the Ledger
+/*
+* @params   {Array} args
+* @property {string} 0       - stringified JSON array of royalty statements.
+* @return   {pb.Response}    - peer Response
+ */
+func updateRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "updateRoyaltyStatements"
+	logger.Info("ENTERING >", methodName, args)
 
-	//check for proper # of args
-	if len(args) < 2 {
-		errMsg := fmt.Sprintf("%s - Incorrect number of parameters provided : %s.  Expecting UUID", methodName, strings.Join(args, ","))
-		logger.Error(errMsg)
-		return shim.Error(errMsg)
+	//Check if array length is greater than 0
+	if len(args) < 1 {
+		return getErrorResponse("Missing arguments: Array of Royalty Statement objects is required")
 	}
 
-	err := stub.DelState(args[0])
+	royaltyStatementsOutput := RoyaltyStatementOutput{}
+	royaltyStatements := &[]RoyaltyStatement{}
+	royaltyStatementResponses := []RoyaltyStatementResponse{}
+
+	//Unmarshal the args input to an array of owner administration records
+	err := jsonToObject([]byte(args[0]), royaltyStatements)
 	if err != nil {
 		return getErrorResponse(err.Error())
 	}
 
-	//return bytes as result
-	return shim.Success([]byte(args[0]))
+	// Iterate over Exploitation Reports
+	for _, royaltyStatement := range *royaltyStatements {
+		royaltyStatement.DocType = ROYALTYSTATEMENT
+		royaltyStatementResponse := RoyaltyStatementResponse{}
+		royaltyStatementResponse.RoyaltyStatementUUID = royaltyStatement.RoyaltyStatementUUID
+		royaltyStatementResponse.Success = true
+
+		//Record Exploitation Report on ledger
+		royaltyStatementsBytes, err := objectToJSON(royaltyStatement)
+		if err != nil {
+			royaltyStatementResponse.Success = false
+			royaltyStatementResponse.Message = err.Error()
+			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
+			royaltyStatementsOutput.FailureCount++
+			continue
+		}
+
+		royaltyStatementExistingBytes, err := stub.GetState(royaltyStatement.RoyaltyStatementUUID)
+		if royaltyStatementExistingBytes == nil {
+			royaltyStatementResponse.Success = false
+			royaltyStatementResponse.Message = "Royalty Statement does not exist!"
+			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
+			royaltyStatementsOutput.FailureCount++
+			continue
+		}
+
+		err = stub.PutState(royaltyStatement.RoyaltyStatementUUID, royaltyStatementsBytes)
+		if err != nil {
+			royaltyStatementResponse.Success = false
+			royaltyStatementResponse.Message = err.Error()
+		}
+
+		if royaltyStatementResponse.Success {
+			royaltyStatementsOutput.SuccessCount++
+		} else {
+			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
+			royaltyStatementsOutput.FailureCount++
+		}
+	}
+
+	royaltyStatementsOutput.RoyaltyStatement = royaltyStatementResponses
+
+	objBytes, _ := objectToJSON(royaltyStatementsOutput)
+	logger.Info("EXITING <", methodName, royaltyStatementsOutput)
+	return shim.Success(objBytes)
 }
