@@ -30,6 +30,7 @@ const (
 	MISSING_COPYRIGHT_HOLDER     string = "MISSING_COPYRIGHT_HOLDER"
 	MISSING_REPRESENTATIVE       string = "MISSING_REPRESENTATIVE"
 	MISSING_AFFILIATE            string = "MISSING_AFFILIATE"
+	UNKOWN_ISRC                  string = "UNKOWN_ISRC"
 )
 
 /////////////////////////////////////////////////////
