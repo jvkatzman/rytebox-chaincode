@@ -100,3 +100,4 @@ func main() {
 		fmt.Printf("Error starting Axispoint chaincode: %s", err)
 	}
 }
+//EOF
