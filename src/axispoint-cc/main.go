@@ -66,6 +66,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["addReports"] = addReports
 	t.funcMap["insertExploitationReports"] = insertExploitationReports
 	t.funcMap["addIpiOrg"] = addIpiOrg
+	t.funcMap["updateIpiOrg"] = updateIpiOrg
 }
 func addReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 

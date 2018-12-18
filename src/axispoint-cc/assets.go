@@ -132,7 +132,7 @@ type Affiliation struct {
 	AffiliateName string `json:"affiliateName"`
 }
 
-//Affiliation : struct defining data model for Affiliation
+//IpiOrgMap : struct defining data model for IPI-Org mapping
 type IpiOrgMap struct {
 	DocType string `json:"docType"`
 	Ipi     string `json:"ipi"`
