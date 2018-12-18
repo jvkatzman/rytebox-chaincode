@@ -16,6 +16,7 @@ const (
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
+	COLLECTIONRIGHTSREPORT   string = "COLLECTIONRIGHTSREPORT"
 )
 
 /////////////////////////////////////////////////////
@@ -130,3 +131,24 @@ type Affiliation struct {
 	Affiliate     string `json:"affiliate"`
 	AffiliateName string `json:"affiliateName"`
 }
+
+//CollectionRights : struct definition
+type CollectionRights struct {
+	DocType              string        `json:"docType"`
+	CollectionRightsUUID string        `json:"collectionRightsUUID"`
+	From                 string        `json:"from"`     //EMI, Freddy, owner or admin.. --- also the key
+	FromName             string        `json:"fromName"` //for display puposes
+	StartDate            string        `json:"startDate"`
+	EndDate              string        `json:"endDate"`
+	RightHolders         []RightHolder `json:"rightHolders"`
+}
+
+//need to coordinate with MATT
+//instead of managing
+//ownershipAdministration
+//AdministratorAffiliation
+
+//rules need to move to collection rights
+//they need to describe commission and generation
+//generate as many files for 'EMI' to their partners
+//depicts privacy at a high level
