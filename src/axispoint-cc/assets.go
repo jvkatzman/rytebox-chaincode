@@ -8,6 +8,11 @@ type Response struct {
 }
 
 /////////////////////////////////////////////////////
+// RoyaltyStatementCreation event name
+/////////////////////////////////////////////////////
+const EventRoyaltyStatementCreation string = "RoyaltyStatementCreation"
+
+/////////////////////////////////////////////////////
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
@@ -152,3 +157,11 @@ type CollectionRights struct {
 //they need to describe commission and generation
 //generate as many files for 'EMI' to their partners
 //depicts privacy at a high level
+
+//RoyaltyStatementCreationEventPayload payload to passed as part of the event.
+type RoyaltyStatementCreationEventPayload struct {
+	Type                   string `json:"type"`
+	TargetOrg              string `json:"targetOrg"`
+	TargetIPI              string `json:"targetIPI"`
+	ExploitationReportUUID string `json:"exploitationReportUUID"`
+}

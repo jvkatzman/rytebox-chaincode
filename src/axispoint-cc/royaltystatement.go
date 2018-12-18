@@ -114,6 +114,20 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	royaltyStatementOutput.RoyaltyStatements = royaltyStatementResponses
 
 	objBytes, _ := objectToJSON(royaltyStatementOutput)
+	//fire an event for Ownership and \ or collection royalty statements.
+	// objRoyaltyStatementEventPayload := RoyaltyStatementCreationEventPayload{}
+	// objRoyaltyStatementEventPayload.ExploitationReportUUID = ""
+	// objRoyaltyStatementEventPayload.TargetIPI = ""
+	// objRoyaltyStatementEventPayload.TargetOrg = ""
+	// objRoyaltyStatementEventPayload.Type = ""
+	// payloadBytes, err := objectToJSON(objRoyaltyStatementEventPayload)
+	// if err != nil {
+	// 	return getErrorResponse(fmt.Sprintf("%s - Failed to construct '%s' payload.  Error: %s", methodName, EventRoyaltyStatementCreation, err.Error()))
+	// }
+	// err = stub.SetEvent(EventRoyaltyStatementCreation, payloadBytes)
+	// if err != nil {
+	// 	return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, payloadBytes, err.Error()))
+	// }
 	logger.Info("EXITING <", methodName, royaltyStatementOutput)
 	return shim.Success(objBytes)
 }
