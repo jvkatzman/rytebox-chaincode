@@ -248,6 +248,11 @@ func deleteAssetByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Respo
 	var methodName = "deleteAssetByUUID"
 	logger.Info("ENTERING >", methodName, args)
 
+	//Check if array length is greater than 0
+	if len(args) < 1 {
+		return getErrorResponse("Missing arguments: UUID is missing")
+	}
+
 	recordsDeletedCount := 0
 	for _, arg := range args {
 

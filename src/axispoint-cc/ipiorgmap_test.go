@@ -25,6 +25,10 @@ func MockIpiOrgResponse(functionName string) []byte {
 		return []byte(`{"message": "IPI-Org mapping updated successfully"}`)
 	case "Test_GetIpiOrgByUUID":
 		return []byte(ipiOrg_out)
+	case "Test_DeleteIpiOrgByUUID":
+		return []byte(`{"status":"200","message":"deleteAssetByUUID - deleted 1 records."}`)
+	case "Test_DeleteIpiOrgByUUID_QueryResult":
+		return []byte(`{"status":"500","message":"UUID: JayZ does not exist"}`)
 	default:
 		return []byte("[]")
 	}
@@ -152,4 +156,42 @@ func Test_GetIpiOrgByUUID(t *testing.T) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
 
+}
+
+func Test_DeleteIpiOrgByUUID(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+
+	_, err := checkInvoke(t, stub, [][]byte{[]byte("addIpiOrg"), []byte(ipiOrg_in)})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	// Check State for Transaction
+	var ipiOrgKey = "JayZ"
+	checkState(t, stub, ipiOrgKey, ipiOrg_out)
+
+	//Now invoke the delete chaincode
+	respPayload, err2 := checkInvoke(t, stub, [][]byte{[]byte("deleteIpiOrgByUUID"), []byte(ipiOrgKey)})
+	if err2 != nil {
+		t.Fatalf(err.Error())
+	}
+
+	expected := MockIpiOrgResponse("Test_DeleteIpiOrgByUUID")
+	if !reflect.DeepEqual(expected, respPayload) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
+
+	respPayload, err2 = testQuery(t, stub, "getIpiOrgByUUID", ipiOrgKey)
+	if err2 != nil {
+		t.Fatalf(err.Error())
+	}
+
+	expected = MockIpiOrgResponse("Test_DeleteIpiOrgByUUID_QueryResult")
+	if !reflect.DeepEqual(expected, respPayload) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
 }

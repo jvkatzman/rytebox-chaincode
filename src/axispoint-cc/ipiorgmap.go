@@ -119,3 +119,16 @@ func getIpiOrgByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	return getAssetByUUID(stub, args)
 
 }
+
+//deleteIpiOrgByUUID function retrieves IPI-Org Mappings by IPI (UUID of a participant)
+/*
+* @params   {Array}  args
+* @property {string} 0     - IPI (UUID of a participant)
+* @return   {Peer.Reponse} - IPI-Org mapping object as Bytes
+ */
+func deleteIpiOrgByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "deleteIpiOrgByUUID"
+	logger.Info("ENTERING >", methodName, args)
+	return deleteAssetByUUID(stub, args)
+
+}
