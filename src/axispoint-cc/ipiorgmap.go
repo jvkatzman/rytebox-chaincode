@@ -106,3 +106,16 @@ func addUpdateIpiOrg(stub shim.ChaincodeStubInterface, ipiOrgObj string, updateF
 	logger.Info("EXITING <", methodName, ipiOrg)
 	return nil
 }
+
+//getIpiOrgByUUID function retrieves IPI-Org Mappings by IPI (UUID of a participant)
+/*
+* @params   {Array}  args
+* @property {string} 0     - IPI (UUID of a participant)
+* @return   {Peer.Reponse} - IPI-Org mapping object as Bytes
+ */
+func getIpiOrgByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "getIpiOrgByUUID"
+	logger.Info("ENTERING >", methodName, args)
+	return getAssetByUUID(stub, args)
+
+}
