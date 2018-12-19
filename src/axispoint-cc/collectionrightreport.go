@@ -50,7 +50,7 @@ func addCollectionRights(stub shim.ChaincodeStubInterface, args []string) pb.Res
 
 	// iterate over royalty statements
 	for _, collectionRight := range *collectionRights {
-		collectionRight.DocType = COLLECTIONRIGHTSREPORT
+		collectionRight.DocType = COLLECTIONRIGHTREPORT
 		collectionRightsResponse := CollectionRightsResponse{}
 		collectionRightsResponse.CollectionRightUUID = collectionRight.CollectionRightUUID
 		collectionRightsResponse.Success = true
@@ -109,7 +109,7 @@ func getCollectionRights(stub shim.ChaincodeStubInterface, args []string) pb.Res
 	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
 	defer logger.Infof("%s - End Execution ", methodName)
 
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", COLLECTIONRIGHTSREPORT)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", COLLECTIONRIGHTREPORT)
 	if len(args) == 1 {
 		queryString = args[0]
 	}
@@ -165,7 +165,7 @@ func updateCollectionRights(stub shim.ChaincodeStubInterface, args []string) pb.
 
 	// iterate over royalty statements
 	for _, collectionRight := range *collectionRights {
-		collectionRight.DocType = COLLECTIONRIGHTSREPORT
+		collectionRight.DocType = COLLECTIONRIGHTREPORT
 		collectionRightsResponse := CollectionRightsResponse{}
 		collectionRightsResponse.CollectionRightUUID = collectionRight.CollectionRightUUID
 		collectionRightsResponse.Success = true
