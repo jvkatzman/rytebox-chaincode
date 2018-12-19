@@ -138,14 +138,14 @@ type Affiliation struct {
 }
 
 //CollectionRights : struct definition
-type CollectionRights struct {
-	DocType              string        `json:"docType"`
-	CollectionRightsUUID string        `json:"collectionRightsUUID"`
-	From                 string        `json:"from"`     //EMI, Freddy, owner or admin.. --- also the key
-	FromName             string        `json:"fromName"` //for display puposes
-	StartDate            string        `json:"startDate"`
-	EndDate              string        `json:"endDate"`
-	RightHolders         []RightHolder `json:"rightHolders"`
+type CollectionRight struct {
+	DocType             string        `json:"docType"`
+	CollectionRightUUID string        `json:"collectionRightUUID"`
+	From                string        `json:"from"`     //EMI, Freddy, owner or admin.. --- also the key
+	FromName            string        `json:"fromName"` //for display puposes
+	StartDate           string        `json:"startDate"`
+	EndDate             string        `json:"endDate"`
+	RightHolders        []RightHolder `json:"rightHolders"`
 }
 
 //need to coordinate with MATT
