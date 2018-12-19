@@ -31,7 +31,7 @@ func addIpiOrg(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	logger.Info("EXITING <", methodName)
-	return shim.Success(nil)
+	return shim.Success([]byte(`{"message": "IPI-Org mapping created successfully"}`))
 }
 
 /*
@@ -58,7 +58,7 @@ func updateIpiOrg(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	logger.Info("EXITING <", methodName)
-	return shim.Success(nil)
+	return shim.Success([]byte(`{"message": "IPI-Org mapping updated successfully"}`))
 }
 
 /*

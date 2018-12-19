@@ -22,7 +22,7 @@ func MockIpiOrgResponse(functionName string) []byte {
 	case "Test_AddIpiOrg_MappingExists":
 		return []byte(`{"status":"500","message":"IPI-Org mapping already exists with this key: JayZ"}`)
 	case "Test_UpdateIpiOrg_MappingExists":
-		return nil
+		return []byte(`{"message": "IPI-Org mapping updated successfully"}`)
 	case "Test_GetIpiOrgByUUID":
 		return []byte(ipiOrg_out)
 	default:
