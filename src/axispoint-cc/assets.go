@@ -16,6 +16,7 @@ const (
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
+	IPIORGMAP                string = "IPIORGMAP"
 )
 
 /////////////////////////////////////////////////////
@@ -129,4 +130,11 @@ type Affiliation struct {
 	Selector      string `json:"selector"`
 	Affiliate     string `json:"affiliate"`
 	AffiliateName string `json:"affiliateName"`
+}
+
+//IpiOrgMap : struct defining data model for IPI-Org mapping
+type IpiOrgMap struct {
+	DocType string `json:"docType"`
+	Ipi     string `json:"ipi"`
+	Org     string `json:"org"`
 }
