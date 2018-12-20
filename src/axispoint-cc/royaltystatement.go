@@ -55,6 +55,10 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	var methodName = "addRoyaltyStatements"
 	logger.Info("ENTERING >", methodName, args)
 
+	//if this function is called with morethan 1 royalty statements
+	//only write if the IPI or the orgs are same for 2 or  more royalty statements
+	//otherwise the chaincode should not continue.
+
 	if len(args) != 1 {
 		return getErrorResponse("Missing arguments: Needed RoyaltyStatement object to Create")
 	}
@@ -118,7 +122,7 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	// objRoyaltyStatementEventPayload := RoyaltyStatementCreationEventPayload{}
 	// objRoyaltyStatementEventPayload.ExploitationReportUUID = ""
 	// objRoyaltyStatementEventPayload.TargetIPI = ""
-	// objRoyaltyStatementEventPayload.TargetOrg = ""
+	// objRoyaltyStatementEventPayload.TargetOrg = "" //make sure that the correct org is calling this function.
 	// objRoyaltyStatementEventPayload.Type = ""
 	// payloadBytes, err := objectToJSON(objRoyaltyStatementEventPayload)
 	// if err != nil {
