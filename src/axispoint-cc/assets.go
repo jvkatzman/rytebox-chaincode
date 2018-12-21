@@ -83,7 +83,8 @@ type RoyaltyStatement struct {
 	Administrator          string  `json:"administrator"`
 	Collector              string  `json:"collector"`
 	State                  string  `json:"state"`
-	//Collectionfee          float64 `json:"collectionFee"`
+	//CollectionRights		float64 `json:"collectionRights"`
+	//CollectionRightsPercent float64 `json:"collectionRightsPercent"`
 }
 
 //CopyrightDataReport : struct definition
@@ -166,6 +167,7 @@ type RoyaltyStatementCreationEventPayload struct {
 	TargetOrg              string `json:"targetOrg"`
 	TargetIPI              string `json:"targetIPI"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
+	IsDSP                  bool   `json:"isDSP"`
 }
 
 //IpiOrgMap : struct defining data model for IPI-Org mapping

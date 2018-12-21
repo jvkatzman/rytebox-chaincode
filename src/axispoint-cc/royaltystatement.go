@@ -51,6 +51,9 @@ Royalty Statements to the Ledger
 * @property {string} 0       - stringified JSON array of royalty statement.
 * @return   {pb.Response}    - peer Response
 */
+// refactor the following : create 2 separete methods
+//1.  Save royaltyStatement As is
+//2.  Save + generate Event.
 func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var methodName = "addRoyaltyStatements"
 	logger.Info("ENTERING >", methodName, args)
@@ -58,6 +61,7 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	//if this function is called with morethan 1 royalty statements
 	//only write if the IPI or the orgs are same for 2 or  more royalty statements
 	//otherwise the chaincode should not continue.
+	royaltyStatementsEventPayloadBytes := []byte{}
 
 	if len(args) != 1 {
 		return getErrorResponse("Missing arguments: Needed RoyaltyStatement object to Create")
@@ -105,6 +109,14 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 		if err != nil {
 			royaltyStatementResponse.Success = false
 			royaltyStatementResponse.Message = err.Error()
+		} else {
+			//assumption: this method should be called with a single royalty statement for now.
+			//TODO: multiple royalty statements if ORG or IPI is the same.
+			payloadBytes, err := getRoyaltyStatementsEventPayload(stub, royaltyStatement)
+			if err != nil {
+				return getErrorResponse(fmt.Sprintf("%s - Failed to construct '%s' payload.  Error: %s", methodName, EventRoyaltyStatementCreation, err.Error()))
+			}
+			royaltyStatementsEventPayloadBytes = append(royaltyStatementsEventPayloadBytes, payloadBytes...)
 		}
 
 		if royaltyStatementResponse.Success {
@@ -118,20 +130,13 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	royaltyStatementOutput.RoyaltyStatements = royaltyStatementResponses
 
 	objBytes, _ := objectToJSON(royaltyStatementOutput)
+
 	//fire an event for Ownership and \ or collection royalty statements.
-	// objRoyaltyStatementEventPayload := RoyaltyStatementCreationEventPayload{}
-	// objRoyaltyStatementEventPayload.ExploitationReportUUID = ""
-	// objRoyaltyStatementEventPayload.TargetIPI = ""
-	// objRoyaltyStatementEventPayload.TargetOrg = "" //make sure that the correct org is calling this function.
-	// objRoyaltyStatementEventPayload.Type = ""
-	// payloadBytes, err := objectToJSON(objRoyaltyStatementEventPayload)
-	// if err != nil {
-	// 	return getErrorResponse(fmt.Sprintf("%s - Failed to construct '%s' payload.  Error: %s", methodName, EventRoyaltyStatementCreation, err.Error()))
-	// }
-	// err = stub.SetEvent(EventRoyaltyStatementCreation, payloadBytes)
-	// if err != nil {
-	// 	return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, payloadBytes, err.Error()))
-	// }
+	err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
+	if err != nil {
+		return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
+	}
+
 	logger.Info("EXITING <", methodName, royaltyStatementOutput)
 	return shim.Success(objBytes)
 }
@@ -334,4 +339,31 @@ func getExploitationReportUUID(stub shim.ChaincodeStubInterface, royaltyStatemen
 
 	logger.Info("EXITING <", methodName, exploitationReportUUID)
 	return exploitationReportUUID, nil
+}
+
+func getRoyaltyStatementsEventPayload(stub shim.ChaincodeStubInterface, royaltyStatement RoyaltyStatement /*royaltyStatements *[]RoyaltyStatement*/) ([]byte, error) {
+	methodName := "getRoyaltyStatementsEventPayload"
+	//objRoyaltyStatementEventPayloads := []RoyaltyStatementCreationEventPayload{}
+	//for _, royaltyStatement := range *royaltyStatements {
+	objRoyaltyStatementEventPayload := RoyaltyStatementCreationEventPayload{}
+	objRoyaltyStatementEventPayload.ExploitationReportUUID = royaltyStatement.ExploitationReportUUID
+	objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.RightHolder // this is the ipi
+	//get the org from the mapping stored on the chain
+	ipiToOrgBytes, err := stub.GetState(royaltyStatement.RightHolder)
+	if err != nil {
+		message := fmt.Sprintf("%s - Failed to get org for IPI '%s'.  Error: %s", methodName, royaltyStatement.RightHolder, err.Error())
+		logger.Error(message)
+		return nil, errors.New(message)
+	}
+	objRoyaltyStatementEventPayload.TargetOrg = string(ipiToOrgBytes)
+	objRoyaltyStatementEventPayload.Type = royaltyStatement.RightType
+	//objRoyaltyStatementEventPayloads = append(objRoyaltyStatementEventPayloads, objRoyaltyStatementEventPayload)
+	//}
+	objResultBytes, err := objectToJSON(objRoyaltyStatementEventPayload)
+	if err != nil {
+		message := fmt.Sprintf("%s - Failed get payload in bytes for IPI to org mapping.  Error: %s", methodName, err.Error())
+		logger.Error(message)
+		return nil, errors.New(message)
+	}
+	return objResultBytes, nil
 }
