@@ -82,6 +82,7 @@ type RoyaltyStatement struct {
 	Administrator          string  `json:"administrator"`
 	Collector              string  `json:"collector"`
 	State                  string  `json:"state"`
+	Collectionfee          float64 `json:"collectionFee"`
 }
 
 //CopyrightDataReport : struct definition
