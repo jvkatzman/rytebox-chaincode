@@ -22,6 +22,7 @@ const (
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
 	COLLECTIONRIGHTREPORT    string = "COLLECTIONRIGHTREPORT" //change this to collectionRight
+	IPIORGMAP                string = "IPIORGMAP"
 )
 
 /////////////////////////////////////////////////////
@@ -82,7 +83,7 @@ type RoyaltyStatement struct {
 	Administrator          string  `json:"administrator"`
 	Collector              string  `json:"collector"`
 	State                  string  `json:"state"`
-	Collectionfee          float64 `json:"collectionFee"`
+	//Collectionfee          float64 `json:"collectionFee"`
 }
 
 //CopyrightDataReport : struct definition
@@ -165,4 +166,11 @@ type RoyaltyStatementCreationEventPayload struct {
 	TargetOrg              string `json:"targetOrg"`
 	TargetIPI              string `json:"targetIPI"`
 	ExploitationReportUUID string `json:"exploitationReportUUID"`
+}
+
+//IpiOrgMap : struct defining data model for IPI-Org mapping
+type IpiOrgMap struct {
+	DocType string `json:"docType"`
+	Ipi     string `json:"ipi"`
+	Org     string `json:"org"`
 }

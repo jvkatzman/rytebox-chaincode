@@ -66,6 +66,11 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["addCollectionRights"] = addCollectionRights
 	t.funcMap["getCollectionRights"] = getCollectionRights
 	t.funcMap["updateCollectionRights"] = updateCollectionRights
+	t.funcMap["addIpiOrg"] = addIpiOrg
+	t.funcMap["updateIpiOrg"] = updateIpiOrg
+	t.funcMap["getIpiOrgByUUID"] = getIpiOrgByUUID
+	t.funcMap["deleteIpiOrgByUUID"] = deleteIpiOrgByUUID
+
 }
 
 // Init - intialize chaincode
