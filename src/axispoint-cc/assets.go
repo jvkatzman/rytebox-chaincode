@@ -83,8 +83,8 @@ type RoyaltyStatement struct {
 	Administrator          string  `json:"administrator"`
 	Collector              string  `json:"collector"`
 	State                  string  `json:"state"`
-	//CollectionRights		float64 `json:"collectionRights"`
-	//CollectionRightsPercent float64 `json:"collectionRightsPercent"`
+	CollectionRight        float64 `json:"collectionRight,omitempty"`
+	CollectionRightPercent float64 `json:"collectionRightPercent,omitempty"`
 }
 
 //CopyrightDataReport : struct definition
