@@ -227,15 +227,31 @@ func generateCollectionStatement(stub shim.ChaincodeStubInterface, args []string
 	logger.Infof("%s - parameters received: %s", methodName, strings.Join(args, ","))
 	//expUUID, TargeIPI, type
 	exploitationReport := ExploitationReport{}
-	expReportUUID := args[0]
+	previousRoyaltyStatement := RoyaltyStatement{}
+	royaltyStatementUUID := args[0]
 	targetIPI := args[1]
 	collectionType := args[2]
 	royaltyStatement := RoyaltyStatement{}
 
-	// check if exploitation report with the UUID exists on the ledger.
+	// get the royalty statement report with the UUID exists on the ledger.
+	royaltyStatementExistingBytes, err := stub.GetState(royaltyStatementUUID)
+	if err != nil {
+		errMessage = fmt.Sprintf("%s - Failed to get royalty statement  with uuid '%s' from the ledger.  Error: %s", methodName, royaltyStatementUUID, err.Error())
+		logger.Error(errMessage)
+		return getErrorResponse(errMessage)
+	}
+	err = jsonToObject(royaltyStatementExistingBytes, &previousRoyaltyStatement)
+	if err != nil {
+		errMessage = fmt.Sprintf("%s - Failed to convert royalty statement with uuid '%s'.  Error: %s", methodName, royaltyStatementUUID, err.Error())
+		logger.Error(errMessage)
+		return getErrorResponse(errMessage)
+	}
+	expReportUUID := previousRoyaltyStatement.ExploitationReportUUID
+
+	// get the exploitation report with the UUID exists on the ledger.
 	exploitationReportExistingBytes, err := stub.GetState(expReportUUID)
 	if err != nil {
-		errMessage = fmt.Sprintf("%s - Failed to get exploitation reqort with uuid '%s' from the ledger.  Error: %s", methodName, expReportUUID, err.Error())
+		errMessage = fmt.Sprintf("%s - Failed to get exploitation report with uuid '%s' from the ledger.  Error: %s", methodName, expReportUUID, err.Error())
 		logger.Error(errMessage)
 		return getErrorResponse(errMessage)
 	}
@@ -251,8 +267,11 @@ func generateCollectionStatement(stub shim.ChaincodeStubInterface, args []string
 	exploitationReportParameters, _ := getEvaluableParameters(&exploitationReport)
 
 	//1.  build the initial royalty statement.
-	royaltyStatement = buildRoyaltyStatementFromExploitationReport(stub, exploitationReport, exploitationReportParameters)
-
+	//if (collectionType == OWNERSHIP){
+	//rename to buildOwnershipStatementsFromExploitationReport
+	// NOT REQUIRED
+	//royaltyStatement = buildRoyaltyStatementFromExploitationReport(stub, exploitationReport, exploitationReportParameters)
+	//}
 	// query copyright data reports
 	/*queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"startDate\": { \"$lte\": \"%s\" }, \"endDate\": { \"$gte\": \"%s\" }}}", COPYRIGHTDATAREPORT, exploitationReport.Isrc, exploitationReport.ExploitationDate, exploitationReport.ExploitationDate)
 	copyrightDataReports, _ := queryCopyrightDataReports(stub, queryString)
@@ -297,7 +316,7 @@ func generateCollectionStatement(stub shim.ChaincodeStubInterface, args []string
 				logger.Infof("%s - current selector is NOT valid.", methodName)
 			}
 		}
-	}
+	}*/
 
 	royaltyStatement.DocType = ROYALTYSTATEMENT
 	royaltyStatement.Source = exploitationReport.Source
@@ -311,7 +330,8 @@ func generateCollectionStatement(stub shim.ChaincodeStubInterface, args []string
 	royaltyStatement.UsageType = exploitationReport.UsageType
 	royaltyStatement.Administrator = ""
 	royaltyStatement.Collector = ""
-	logger.Infof("%s - struct value : %+v\n", methodName, royaltyStatement)*/
+	royaltyStatement.Amount = previousRoyaltyStatement.Amount
+	logger.Infof("%s - struct value : %+v\n", methodName, royaltyStatement)
 
 	//2. Get all potential collectionrights  that we have based on the 'From' field matching the target IPI.
 	collectionRights, err := getCollectionRightsMatchingIpi(stub, targetIPI)
@@ -347,16 +367,16 @@ collectionRightsLoop:
 					royaltyStatement.RightHolder = targetIPI
 					royaltyStatement.Administrator = rightHolder.IPI
 					royaltyStatement.RightType = COLLECTION
-					royaltyStatement.CollectionRightPercent = rightHolder.Percent
+					royaltyStatement.CollectionRightPercent = rightHolder.Percent / 100
 					royaltyStatement.CollectionRight = royaltyStatement.Amount * royaltyStatement.CollectionRightPercent
 				}
 				if collectionType == COLLECTION {
 					royaltyStatement.Administrator = targetIPI
 					royaltyStatement.Collector = rightHolder.IPI
 					royaltyStatement.RightType = COLLECTION
-					royaltyStatement.CollectionRightPercent = rightHolder.Percent
+					royaltyStatement.CollectionRightPercent = rightHolder.Percent / 100
 					royaltyStatement.CollectionRight = royaltyStatement.Amount * royaltyStatement.CollectionRightPercent
-
+					royaltyStatement.RightHolder = previousRoyaltyStatement.RightHolder
 				}
 
 				break collectionRightsLoop
@@ -370,7 +390,7 @@ collectionRightsLoop:
 		royaltyStatement.CollectionRightPercent = 0.0000
 		royaltyStatement.CollectionRight = 0.0000
 		royaltyStatement.RightType = COLLECTION
-
+		royaltyStatement.RightHolder = previousRoyaltyStatement.RightHolder
 	}
 	////return the royaltyStatement
 	objResultBytes, err := objectToJSON(royaltyStatement)
@@ -420,6 +440,7 @@ func buildRoyaltyStatementFromExploitationReport(stub shim.ChaincodeStubInterfac
 
 	// query copyright data reports
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"startDate\": { \"$lte\": \"%s\" }, \"endDate\": { \"$gte\": \"%s\" }}}", COPYRIGHTDATAREPORT, exploitationReport.Isrc, exploitationReport.ExploitationDate, exploitationReport.ExploitationDate)
+
 	copyrightDataReports, _ := queryCopyrightDataReports(stub, queryString)
 
 	royaltyStatement := RoyaltyStatement{}

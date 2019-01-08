@@ -222,10 +222,10 @@ func addRoyaltyStatementAndEvent(stub shim.ChaincodeStubInterface, args []string
 	objBytes, _ := objectToJSON(royaltyStatementOutput)
 
 	//fire an event for Ownership and \ or collection royalty statements.
-	err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
-	if err != nil {
-		return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
-	}
+	// err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
+	// if err != nil {
+	// 	return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
+	// }
 
 	logger.Info("EXITING <", methodName, royaltyStatementOutput)
 	return shim.Success(objBytes)
@@ -456,12 +456,17 @@ func getRoyaltyStatementsEventPayload(stub shim.ChaincodeStubInterface, royaltyS
 		return nil, errors.New(message)
 	}
 	//get the org from the mapping stored on the chain
-	ipiToOrgBytes, err := stub.GetState(royaltyStatement.RightHolder)
-	if err != nil {
-		message := fmt.Sprintf("%s - Failed to get org for IPI '%s'.  Error: %s", methodName, royaltyStatement.RightHolder, err.Error())
+	//ipiToOrgBytes, err := getAssetByUUID(stub, []string{royaltyStatement.RightHolder}]).//stub.GetState(royaltyStatement.RightHolder)
+	response := getAssetByUUID(stub, []string{royaltyStatement.RightHolder})
+	if response.GetStatus() != shim.OK {
+		//if err != nil {
+		//message := fmt.Sprintf("%s - Failed to get org for IPI '%s'.  Error: %s", methodName, royaltyStatement.RightHolder, err.Error())
+		message := fmt.Sprintf("%s - Failed to get org for IPI '%s'.  Error: %s", methodName, royaltyStatement.RightHolder, response.GetMessage())
 		logger.Error(message)
 		return nil, errors.New(message)
 	}
+	ipiToOrgBytes := response.GetPayload()
+
 	objRoyaltyStatementEventPayload.TargetOrg = string(ipiToOrgBytes)
 	logger.Infof("%s - setting 'target org' for event payload to '%s'.", methodName, objRoyaltyStatementEventPayload.TargetOrg)
 	objRoyaltyStatementEventPayload.Type = COLLECTION // or // royaltyStatement.RightType
