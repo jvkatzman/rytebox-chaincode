@@ -163,11 +163,11 @@ type CollectionRight struct {
 
 //RoyaltyStatementCreationEventPayload payload to passed as part of the event.
 type RoyaltyStatementCreationEventPayload struct {
-	Type                   string `json:"type"`
-	TargetOrg              string `json:"targetOrg"`
-	TargetIPI              string `json:"targetIPI"`
-	ExploitationReportUUID string `json:"exploitationReportUUID"`
-	IsDSP                  bool   `json:"isDSP"`
+	Type                 string `json:"type"`
+	TargetOrg            string `json:"targetOrg"`
+	TargetIPI            string `json:"targetIPI"`
+	RoyaltyStatementUUID string `json:"royaltyStatementUUID"`
+	IsDSP                bool   `json:"isDSP"`
 }
 
 //IpiOrgMap : struct defining data model for IPI-Org mapping

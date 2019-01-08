@@ -61,96 +61,6 @@ func addRoyaltyStatements(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	//if this function is called with morethan 1 royalty statements
 	//only write if the IPI or the orgs are same for 2 or  more royalty statements
 	//otherwise the chaincode should not continue.
-	//royaltyStatementsEventPayloadBytes := []byte{}
-
-	if len(args) != 1 {
-		return getErrorResponse("Missing arguments: Needed RoyaltyStatement object to Create")
-	}
-
-	royaltyStatementOutput := RoyaltyStatementOutput{}
-	royaltyStatements := &[]RoyaltyStatement{}
-	royaltyStatementResponses := []RoyaltyStatementResponse{}
-
-	// Unmarshal the args input to an array of royalty statement records
-	err := jsonToObject([]byte(args[0]), royaltyStatements)
-	if err != nil {
-		return getErrorResponse(err.Error())
-	}
-
-	// iterate over royalty statements
-	for _, royaltyStatement := range *royaltyStatements {
-		royaltyStatement.DocType = ROYALTYSTATEMENT
-		royaltyStatementResponse := RoyaltyStatementResponse{}
-		royaltyStatementResponse.RoyaltyStatementUUID = royaltyStatement.RoyaltyStatementUUID
-		royaltyStatementResponse.Success = true
-
-		// check if royalty statement already exists
-		royaltyStatementExistingBytes, err := stub.GetState(royaltyStatement.RoyaltyStatementUUID)
-		if royaltyStatementExistingBytes != nil {
-			royaltyStatementResponse.Success = false
-			royaltyStatementResponse.Message = "Royalty Statement already exists!"
-			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
-			royaltyStatementOutput.FailureCount++
-			continue
-		}
-
-		// convert royalty statement to bytes
-		royaltyStatementBytes, err := objectToJSON(royaltyStatement)
-		if err != nil {
-			royaltyStatementResponse.Success = false
-			royaltyStatementResponse.Message = err.Error()
-			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
-			royaltyStatementOutput.FailureCount++
-			continue
-		}
-
-		// add royalty statement to the ledger
-		err = stub.PutState(royaltyStatement.RoyaltyStatementUUID, royaltyStatementBytes)
-		if err != nil {
-			royaltyStatementResponse.Success = false
-			royaltyStatementResponse.Message = err.Error()
-			// } else {
-			// 	//assumption: this method should be called with a single royalty statement for now.
-			// 	//TODO: multiple royalty statements if ORG or IPI is the same.
-			// 	payloadBytes, err := getRoyaltyStatementsEventPayload(stub, royaltyStatement)
-			// 	if err != nil {
-			// 		return getErrorResponse(fmt.Sprintf("%s - Failed to construct '%s' payload.  Error: %s", methodName, EventRoyaltyStatementCreation, err.Error()))
-			// 	}
-			// 	royaltyStatementsEventPayloadBytes = append(royaltyStatementsEventPayloadBytes, payloadBytes...)
-		}
-
-		if royaltyStatementResponse.Success {
-			royaltyStatementOutput.SuccessCount++
-		} else {
-			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
-			royaltyStatementOutput.FailureCount++
-		}
-	}
-
-	royaltyStatementOutput.RoyaltyStatements = royaltyStatementResponses
-
-	objBytes, _ := objectToJSON(royaltyStatementOutput)
-
-	//fire an event for Ownership and \ or collection royalty statements.
-	// if len(*royaltyStatements) == 1 && (*royaltyStatements)[0].SongTitle == "The Girl From Paris-vg1" {
-	// 	err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
-	// 	if err != nil {
-	// 		return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
-	// 	}
-	// }
-
-	logger.Info("EXITING <", methodName, royaltyStatementOutput)
-	return shim.Success(objBytes)
-}
-
-//addRoyaltyStatementsAndEvent - save the royalty statement and fire an event
-func addRoyaltyStatementAndEvent(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var methodName = "addRoyaltyStatementAndEvent"
-	logger.Info("ENTERING >", methodName, args)
-
-	//if this function is called with morethan 1 royalty statements
-	//only write if the IPI or the orgs are same for 2 or  more royalty statements
-	//otherwise the chaincode should not continue.
 	royaltyStatementsEventPayloadBytes := []byte{}
 
 	if len(args) != 1 {
@@ -221,11 +131,112 @@ func addRoyaltyStatementAndEvent(stub shim.ChaincodeStubInterface, args []string
 
 	objBytes, _ := objectToJSON(royaltyStatementOutput)
 
-	//fire an event for Ownership and \ or collection royalty statements.
-	// err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
-	// if err != nil {
-	// 	return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
-	// }
+	//fire an event for Ownership report only
+	if len(*royaltyStatements) == 1 && (*royaltyStatements)[0].RightType == OWNERSHIP {
+		logger.Infof("%s - firing event '%s'.", methodName, EventRoyaltyStatementCreation)
+		err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
+		if err != nil {
+			return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
+		}
+	}
+
+	logger.Info("EXITING <", methodName, royaltyStatementOutput)
+	return shim.Success(objBytes)
+}
+
+//addRoyaltyStatementsAndEvent - save the royalty statement and fire an event
+func addRoyaltyStatementAndEvent(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "addRoyaltyStatementAndEvent"
+	logger.Info("ENTERING >", methodName, args)
+
+	//if this function is called with morethan 1 royalty statements
+	//only write if the IPI or the orgs are same for 2 or  more royalty statements
+	//otherwise the chaincode should not continue.
+	royaltyStatementsEventPayloadBytes := []byte{}
+	isFinalRoyaltyStatement := false
+
+	if len(args) != 1 {
+		return getErrorResponse("Missing arguments: Needed RoyaltyStatement object to Create")
+	}
+
+	royaltyStatementOutput := RoyaltyStatementOutput{}
+	royaltyStatements := &[]RoyaltyStatement{}
+	royaltyStatementResponses := []RoyaltyStatementResponse{}
+
+	// Unmarshal the args input to an array of royalty statement records
+	err := jsonToObject([]byte(args[0]), royaltyStatements)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	// iterate over royalty statements
+	for _, royaltyStatement := range *royaltyStatements {
+		royaltyStatement.DocType = ROYALTYSTATEMENT
+		royaltyStatementResponse := RoyaltyStatementResponse{}
+		royaltyStatementResponse.RoyaltyStatementUUID = royaltyStatement.RoyaltyStatementUUID
+		royaltyStatementResponse.Success = true
+
+		// check if royalty statement already exists
+		royaltyStatementExistingBytes, err := stub.GetState(royaltyStatement.RoyaltyStatementUUID)
+		if royaltyStatementExistingBytes != nil {
+			royaltyStatementResponse.Success = false
+			royaltyStatementResponse.Message = "Royalty Statement already exists!"
+			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
+			royaltyStatementOutput.FailureCount++
+			continue
+		}
+
+		// convert royalty statement to bytes
+		royaltyStatementBytes, err := objectToJSON(royaltyStatement)
+		if err != nil {
+			royaltyStatementResponse.Success = false
+			royaltyStatementResponse.Message = err.Error()
+			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
+			royaltyStatementOutput.FailureCount++
+			continue
+		}
+
+		if royaltyStatement.CollectionRight == 0 && royaltyStatement.CollectionRightPercent == 0 {
+			isFinalRoyaltyStatement = true
+			logger.Infof("%s - final royalty statement received with uuid : %s", methodName, royaltyStatement.RoyaltyStatementUUID)
+		}
+
+		// add royalty statement to the ledger
+		err = stub.PutState(royaltyStatement.RoyaltyStatementUUID, royaltyStatementBytes)
+		if err != nil {
+			royaltyStatementResponse.Success = false
+			royaltyStatementResponse.Message = err.Error()
+		} else if isFinalRoyaltyStatement == false {
+			//assumption: this method should be called with a single royalty statement for now.
+			//TODO: multiple royalty statements if ORG or IPI is the same.
+			payloadBytes, err := getRoyaltyStatementsEventPayload(stub, royaltyStatement)
+			if err != nil {
+				return getErrorResponse(fmt.Sprintf("%s - Failed to construct '%s' payload.  Error: %s", methodName, EventRoyaltyStatementCreation, err.Error()))
+			}
+			royaltyStatementsEventPayloadBytes = append(royaltyStatementsEventPayloadBytes, payloadBytes...)
+		}
+
+		if royaltyStatementResponse.Success {
+			royaltyStatementOutput.SuccessCount++
+		} else {
+			royaltyStatementResponses = append(royaltyStatementResponses, royaltyStatementResponse)
+			royaltyStatementOutput.FailureCount++
+		}
+	}
+
+	royaltyStatementOutput.RoyaltyStatements = royaltyStatementResponses
+
+	objBytes, _ := objectToJSON(royaltyStatementOutput)
+
+	//fire an event for any royalty statements as long as its not the last one.
+	if isFinalRoyaltyStatement == false {
+		err = stub.SetEvent(EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes)
+		if err != nil {
+			return getErrorResponse(fmt.Sprintf("%s - Failed to set event '%s' with payload '%s'.  Error: %s", methodName, EventRoyaltyStatementCreation, royaltyStatementsEventPayloadBytes, err.Error()))
+		}
+	} else {
+		logger.Infof("%s - event '%s' not fired due to final royalty report.", methodName, EventRoyaltyStatementCreation)
+	}
 
 	logger.Info("EXITING <", methodName, royaltyStatementOutput)
 	return shim.Success(objBytes)
@@ -435,8 +446,10 @@ func getRoyaltyStatementsEventPayload(stub shim.ChaincodeStubInterface, royaltyS
 	methodName := "getRoyaltyStatementsEventPayload"
 
 	objRoyaltyStatementEventPayload := RoyaltyStatementCreationEventPayload{}
-	objRoyaltyStatementEventPayload.ExploitationReportUUID = royaltyStatement.ExploitationReportUUID
-	if len(royaltyStatement.RightHolder) > 0 && len(royaltyStatement.Administrator) > 0 {
+	objRoyaltyStatementEventPayload.RoyaltyStatementUUID = royaltyStatement.RoyaltyStatementUUID
+	objRoyaltyStatementEventPayload.Type = COLLECTION
+	logger.Infof("%s - setting 'type' for event payload to '%s'.", methodName, objRoyaltyStatementEventPayload.Type)
+	/*if len(royaltyStatement.RightHolder) > 0 && len(royaltyStatement.Administrator) > 0 {
 		logger.Infof("%s - found a valid royalty statement right holder '%s' and administrator '%s'.", methodName, royaltyStatement.RightHolder, royaltyStatement.Administrator)
 		objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.Administrator
 		objRoyaltyStatementEventPayload.IsDSP = false
@@ -445,10 +458,25 @@ func getRoyaltyStatementsEventPayload(stub shim.ChaincodeStubInterface, royaltyS
 		objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.Collector
 		objRoyaltyStatementEventPayload.IsDSP = false
 
+	}*/
+	if len(royaltyStatement.Collector) > 0 && len(royaltyStatement.Administrator) > 0 {
+		logger.Infof("%s - found a valid royalty statement collector '%s' and administrator '%s'.", methodName, royaltyStatement.Collector, royaltyStatement.Administrator)
+		objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.Collector
+		objRoyaltyStatementEventPayload.IsDSP = false
+
+	} else if len(royaltyStatement.RightHolder) > 0 && len(royaltyStatement.Administrator) > 0 {
+		logger.Infof("%s - found a valid royalty statement right holder '%s' and administrator '%s'.", methodName, royaltyStatement.RightHolder, royaltyStatement.Administrator)
+		objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.Administrator
+		objRoyaltyStatementEventPayload.IsDSP = false
 	} else if len(royaltyStatement.Collector) > 0 && len(royaltyStatement.Administrator) == 0 {
 		logger.Infof("%s - found a valid royalty statement collector '%s' and an invalid administrator.  Using source '%s'.", methodName, royaltyStatement.Collector, royaltyStatement.Source)
 		objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.Source
 		objRoyaltyStatementEventPayload.IsDSP = true
+	} else if royaltyStatement.RightType == OWNERSHIP {
+		objRoyaltyStatementEventPayload.TargetIPI = royaltyStatement.RightHolder
+		objRoyaltyStatementEventPayload.IsDSP = false
+		objRoyaltyStatementEventPayload.Type = OWNERSHIP
+
 	} else {
 		//error condition
 		message := fmt.Sprintf("%s - incorrect condition found when determining the target IPI and dsp status.  Operation cannot continue", methodName)
@@ -467,10 +495,8 @@ func getRoyaltyStatementsEventPayload(stub shim.ChaincodeStubInterface, royaltyS
 	}
 	ipiToOrgBytes := response.GetPayload()
 
-	objRoyaltyStatementEventPayload.TargetOrg = string(ipiToOrgBytes)
+	objRoyaltyStatementEventPayload.TargetOrg = string(ipiToOrgBytes) //`{"org":"org2"}`
 	logger.Infof("%s - setting 'target org' for event payload to '%s'.", methodName, objRoyaltyStatementEventPayload.TargetOrg)
-	objRoyaltyStatementEventPayload.Type = COLLECTION // or // royaltyStatement.RightType
-	logger.Infof("%s - setting 'type' for event payload to '%s'.", methodName, objRoyaltyStatementEventPayload.Type)
 
 	objResultBytes, err := objectToJSON(objRoyaltyStatementEventPayload)
 	if err != nil {

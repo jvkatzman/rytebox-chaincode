@@ -266,58 +266,7 @@ func generateCollectionStatement(stub shim.ChaincodeStubInterface, args []string
 	// create exploitation report parameters to evaluate the selector expressions
 	exploitationReportParameters, _ := getEvaluableParameters(&exploitationReport)
 
-	//1.  build the initial royalty statement.
-	//if (collectionType == OWNERSHIP){
-	//rename to buildOwnershipStatementsFromExploitationReport
-	// NOT REQUIRED
-	//royaltyStatement = buildRoyaltyStatementFromExploitationReport(stub, exploitationReport, exploitationReportParameters)
-	//}
-	// query copyright data reports
-	/*queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"startDate\": { \"$lte\": \"%s\" }, \"endDate\": { \"$gte\": \"%s\" }}}", COPYRIGHTDATAREPORT, exploitationReport.Isrc, exploitationReport.ExploitationDate, exploitationReport.ExploitationDate)
-	copyrightDataReports, _ := queryCopyrightDataReports(stub, queryString)
-
-	logger.Infof("%s - found %d copyright data reports.", methodName, len(copyrightDataReports))
-
-	// set the percentage. used for calculating incomplete royalty statement splits
-	totalPercentage := 0.0
-
-	for _, copyrightDataReport := range copyrightDataReports {
-		// get all the right holders and evaluate againist right holder selector expression
-		for _, rightHolder := range copyrightDataReport.RightHolders {
-			isSelectorValid := false
-			// generate royalty statements for copy right holders with empty selector
-			if rightHolder.Selector == "" {
-				logger.Infof("%s - found empty selector", methodName)
-				isSelectorValid = true
-			} else {
-				logger.Infof("%s - found selector : %s", methodName, rightHolder.Selector)
-				isSelectorValidResult, err := evaluate(rightHolder.Selector, exploitationReportParameters)
-				if err != nil {
-					logger.Errorf("%s - Failed to get a valid evaluator for right holder ipi %s, selector %s. Error: %s", methodName, rightHolder.IPI, rightHolder.Selector, err.Error())
-				}
-				//to prevent a crash when test cases are run.
-				if reflect.ValueOf(isSelectorValidResult).IsValid() {
-					isSelectorValid = isSelectorValidResult.(bool)
-				}
-			}
-			if isSelectorValid {
-				logger.Infof("%s - current selector is valid", methodName)
-				// generate royalty statment
-				//royaltyStatement := RoyaltyStatement{}
-				// set the royalty statment right holder
-				royaltyStatement.RightHolder = rightHolder.IPI
-				// set the right type to OWNERSHIP as the royalty statement is between DSP and owner adminsitrator
-				royaltyStatement.RightType = COLLECTION
-				royaltyStatement.Amount = toFixed(exploitationReport.Amount*rightHolder.Percent*0.01, 2)
-				logger.Infof("%s - setting royalty statement amount to %f .", methodName, toFixed(exploitationReport.Amount*rightHolder.Percent*0.01, 2))
-				logger.Infof("%s - value assigned %f .", methodName, royaltyStatement.Amount)
-				totalPercentage += rightHolder.Percent
-			} else {
-				logger.Infof("%s - current selector is NOT valid.", methodName)
-			}
-		}
-	}*/
-
+	//1. setup the base royalty statement
 	royaltyStatement.DocType = ROYALTYSTATEMENT
 	royaltyStatement.Source = exploitationReport.Source
 	royaltyStatement.SongTitle = exploitationReport.SongTitle
@@ -392,7 +341,7 @@ collectionRightsLoop:
 		royaltyStatement.RightType = COLLECTION
 		royaltyStatement.RightHolder = previousRoyaltyStatement.RightHolder
 	}
-	////return the royaltyStatement
+	//return the royaltyStatement
 	objResultBytes, err := objectToJSON(royaltyStatement)
 	if err != nil {
 		errMessage = fmt.Sprintf("%s - Failed to get royalty statement bytes for uuid %s.  Error: %s", methodName, royaltyStatement.RoyaltyStatementUUID, err.Error())
@@ -428,76 +377,5 @@ func getCollectionRightsMatchingIpi(stub shim.ChaincodeStubInterface, targetIPI 
 	}
 	logger.Infof("%s - retrieved %d collection right reports matching target IPI '%s'.", methodName, len(resultCollectionRights), targetIPI)
 	return resultCollectionRights, nil
-
-}
-
-func buildRoyaltyStatementFromExploitationReport(stub shim.ChaincodeStubInterface, exploitationReport ExploitationReport, exploitationReportParameters map[string]interface{}) RoyaltyStatement {
-
-	var methodName = "buildRoyaltyStatementFromExploitationReport"
-	logger.Infof("%s - Begin Execution ", methodName)
-	//logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
-	defer logger.Infof("%s - End Execution ", methodName)
-
-	// query copyright data reports
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\",\"isrc\":\"%s\", \"startDate\": { \"$lte\": \"%s\" }, \"endDate\": { \"$gte\": \"%s\" }}}", COPYRIGHTDATAREPORT, exploitationReport.Isrc, exploitationReport.ExploitationDate, exploitationReport.ExploitationDate)
-
-	copyrightDataReports, _ := queryCopyrightDataReports(stub, queryString)
-
-	royaltyStatement := RoyaltyStatement{}
-	for _, copyrightDataReport := range copyrightDataReports {
-		// get all the right holders and evaluate againist right holder selector expression
-		for _, rightHolder := range copyrightDataReport.RightHolders {
-			isSelectorValid := false
-			// generate royalty statements for copy right holders with empty selector
-			if rightHolder.Selector == "" {
-				logger.Infof("%s - found empty selector", methodName)
-				isSelectorValid = true
-			} else {
-				logger.Infof("%s - found selector : %s", methodName, rightHolder.Selector)
-				isSelectorValidResult, err := evaluate(rightHolder.Selector, exploitationReportParameters)
-				if err != nil {
-					logger.Errorf("%s - Failed to get a valid evaluator for right holder ipi %s, selector %s. Error: %s", methodName, rightHolder.IPI, rightHolder.Selector, err.Error())
-				}
-				//to prevent a crash when test cases are run.
-				if reflect.ValueOf(isSelectorValidResult).IsValid() {
-					isSelectorValid = isSelectorValidResult.(bool)
-				}
-			}
-			if isSelectorValid {
-				logger.Infof("%s - current selector is valid", methodName)
-				// generate royalty statment
-				//royaltyStatement := RoyaltyStatement{}
-				// set the royalty statment right holder
-				royaltyStatement.RightHolder = rightHolder.IPI
-				// set the right type to OWNERSHIP as the royalty statement is between DSP and owner adminsitrator
-				royaltyStatement.RightType = OWNERSHIP
-				royaltyStatement.Amount = toFixed(exploitationReport.Amount*rightHolder.Percent*0.01, 2)
-				logger.Infof("%s - setting royalty statement amount to %f .", methodName, toFixed(exploitationReport.Amount*rightHolder.Percent*0.01, 2))
-				logger.Infof("%s - value assigned %f .", methodName, royaltyStatement.Amount)
-				//totalPercentage += rightHolder.Percent
-			} else {
-				logger.Infof("%s - current selector is NOT valid.", methodName)
-			}
-		}
-	}
-
-	royaltyStatement.DocType = ROYALTYSTATEMENT
-	royaltyStatement.Source = exploitationReport.Source
-	royaltyStatement.SongTitle = exploitationReport.SongTitle
-	royaltyStatement.Isrc = exploitationReport.Isrc
-	royaltyStatement.ExploitationReportUUID = exploitationReport.ExploitationReportUUID
-	royaltyStatement.ExploitationDate = exploitationReport.ExploitationDate
-	royaltyStatement.WriterName = exploitationReport.WriterName
-	royaltyStatement.Units = exploitationReport.Units
-	royaltyStatement.Territory = exploitationReport.Territory
-	royaltyStatement.UsageType = exploitationReport.UsageType
-	royaltyStatement.Administrator = ""
-	royaltyStatement.Collector = ""
-	logger.Infof("%s - struct value : %+v\n", methodName, royaltyStatement)
-
-	return royaltyStatement
-}
-
-func evaluateCollectionRightSelector() {
 
 }
