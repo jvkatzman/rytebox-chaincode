@@ -25,6 +25,8 @@ func MockIpiOrgResponse(functionName string) []byte {
 		return []byte(`{"message": "IPI-Org mapping updated successfully"}`)
 	case "Test_GetIpiOrgByUUID":
 		return []byte(ipiOrg_out)
+	case "Test_GetAllIpiOrgs":
+		return []byte(`[{"docType":"IPIORGMAP","ipi":"jay123","org":"org1"},{"docType":"IPIORGMAP","ipi":"pbull456","org":"org2"}]`)
 	case "Test_DeleteIpiOrgByUUID":
 		return []byte(`{"status":"200","message":"deleteAssetByUUID - deleted 1 records."}`)
 	case "Test_DeleteIpiOrgByUUID_QueryResult":
@@ -32,6 +34,10 @@ func MockIpiOrgResponse(functionName string) []byte {
 	default:
 		return []byte("[]")
 	}
+}
+
+func MockGetAllIpiOrgs(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
+	return []string{`{"docType":"IPIORGMAP","ipi":"jay123","org":"org1"},{"docType":"IPIORGMAP","ipi":"pbull456","org":"org2"}`}, nil
 }
 
 // *****************************************************************************
@@ -156,6 +162,26 @@ func Test_GetIpiOrgByUUID(t *testing.T) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
 
+}
+
+func Test_GetAllIpiOrgs(t *testing.T) {
+	scc := new(AxispointChaincode)
+	stub := shim.NewMockStub("AxispointChaincode", scc)
+
+	// Init
+	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
+	getIpiOrgForQueryString = MockGetAllIpiOrgs
+
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("getAllIpiOrgs"), []byte("")})
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	expected := MockIpiOrgResponse("Test_GetAllIpiOrgs")
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
 }
 
 func Test_DeleteIpiOrgByUUID(t *testing.T) {
