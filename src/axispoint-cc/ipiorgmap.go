@@ -50,11 +50,13 @@ func updateIpiOrg(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return getErrorResponse("Missing arguments: IPI-Org Mapping object is required")
 	}
 
-	err := addUpdateIpiOrg(stub, args[0], true)
-	if err != nil {
-		errorMessage := err.Error()
-		logger.Error(methodName, errorMessage)
-		return getErrorResponse(errorMessage)
+	for _, arg := range args {
+		err := addUpdateIpiOrg(stub, arg, true)
+		if err != nil {
+			errorMessage := err.Error()
+			logger.Error(methodName, errorMessage)
+			return getErrorResponse(errorMessage)
+		}
 	}
 
 	logger.Info("EXITING <", methodName)
