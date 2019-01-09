@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -40,7 +39,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.tableMap = make(map[string]int)
 	t.funcMap = make(map[string]InvokeFunc)
 	t.funcMap["addRoyaltyStatements"] = addRoyaltyStatements
-	t.funcMap["addExploitationReports"] = addExploitationReports
+	t.funcMap["generateExploitationReports"] = generateExploitationReports
 	t.funcMap["updateExploitationReports"] = updateExploitationReports
 	t.funcMap["getExploitationReports"] = getExploitationReports
 	t.funcMap["getRoyaltyStatements"] = getRoyaltyStatements
@@ -63,37 +62,17 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["getAdministratorAffiliations"] = getAdministratorAffiliations
 	t.funcMap["getRoyaltyStatementsByUUIDs"] = getRoyaltyStatementsByUUIDs
 	t.funcMap["updateRoyaltyStatements"] = updateRoyaltyStatements
-	t.funcMap["addReports"] = addReports
 	t.funcMap["insertExploitationReports"] = insertExploitationReports
+	t.funcMap["addCollectionRights"] = addCollectionRights
+	t.funcMap["getCollectionRights"] = getCollectionRights
+	t.funcMap["updateCollectionRights"] = updateCollectionRights
 	t.funcMap["addIpiOrg"] = addIpiOrg
 	t.funcMap["updateIpiOrg"] = updateIpiOrg
 	t.funcMap["getIpiOrgByUUID"] = getIpiOrgByUUID
 	t.funcMap["deleteIpiOrgByUUID"] = deleteIpiOrgByUUID
+	t.funcMap["generateCollectionStatement"] = generateCollectionStatement
+	t.funcMap["addRoyaltyStatementAndEvent"] = addRoyaltyStatementAndEvent
 
-}
-func addReports(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-
-	var methodName = "addReports"
-	logger.Infof("%s - Begin Execution ", methodName)
-	logger.Infof("%s - # of arguments: %d", methodName, len(args))
-	logger.Infof("%s - parameters received : %s", methodName, strings.Join(args, ","))
-	defer logger.Infof("%s - End Execution ", methodName)
-
-	if len(args) < 2 {
-		return getErrorResponse(methodName + " incorrect number of args provided.")
-	}
-
-	//args = append(args[:0], args[1:]...)
-	result := insertExploitationReports(stub, args)
-	if result.GetStatus() != shim.OK {
-		return getErrorResponse("updateExploitationReports failed with " + result.GetMessage())
-	}
-	args = append(args[:0], args[1:]...)
-	result = addRoyaltyStatements(stub, args)
-	if result.GetStatus() != shim.OK {
-		return getErrorResponse("addRoyaltyStatements failed with " + result.GetMessage())
-	}
-	return shim.Success(nil)
 }
 
 // Init - intialize chaincode

@@ -8,6 +8,11 @@ type Response struct {
 }
 
 /////////////////////////////////////////////////////
+// RoyaltyStatementCreation event name
+/////////////////////////////////////////////////////
+const EventRoyaltyStatementCreation string = "RoyaltyStatementCreation"
+
+/////////////////////////////////////////////////////
 // Constant for table names
 /////////////////////////////////////////////////////
 const (
@@ -16,6 +21,7 @@ const (
 	ADMINISTRATORAFFILIATION string = "ADMINISTRATORAFFILIATION"
 	COPYRIGHTDATAREPORT      string = "COPYRIGHTDATAREPORT"
 	ROYALTYSTATEMENT         string = "ROYALTYSTATEMENT"
+	COLLECTIONRIGHTREPORT    string = "COLLECTIONRIGHTREPORT" //change this to collectionRight
 	IPIORGMAP                string = "IPIORGMAP"
 )
 
@@ -77,6 +83,8 @@ type RoyaltyStatement struct {
 	Administrator          string  `json:"administrator"`
 	Collector              string  `json:"collector"`
 	State                  string  `json:"state"`
+	CollectionRight        float64 `json:"collectionRight,omitempty"`
+	CollectionRightPercent float64 `json:"collectionRightPercent,omitempty"`
 }
 
 //CopyrightDataReport : struct definition
@@ -130,6 +138,36 @@ type Affiliation struct {
 	Selector      string `json:"selector"`
 	Affiliate     string `json:"affiliate"`
 	AffiliateName string `json:"affiliateName"`
+}
+
+//CollectionRights : struct definition
+type CollectionRight struct {
+	DocType             string        `json:"docType"`
+	CollectionRightUUID string        `json:"collectionRightUUID"`
+	From                string        `json:"from"`     //EMI, Freddy, owner or admin.. --- also the key
+	FromName            string        `json:"fromName"` //for display puposes
+	StartDate           string        `json:"startDate"`
+	EndDate             string        `json:"endDate"`
+	RightHolders        []RightHolder `json:"rightHolders"`
+}
+
+//need to coordinate with MATT
+//instead of managing
+//ownershipAdministration
+//AdministratorAffiliation
+
+//rules need to move to collection rights
+//they need to describe commission and generation
+//generate as many files for 'EMI' to their partners
+//depicts privacy at a high level
+
+//RoyaltyStatementCreationEventPayload payload to passed as part of the event.
+type RoyaltyStatementCreationEventPayload struct {
+	Type                 string `json:"type"`
+	TargetOrg            string `json:"targetOrg"`
+	TargetIPI            string `json:"targetIPI"`
+	RoyaltyStatementUUID string `json:"royaltyStatementUUID"`
+	IsDSP                bool   `json:"isDSP"`
 }
 
 //IpiOrgMap : struct defining data model for IPI-Org mapping
