@@ -69,6 +69,7 @@ func (t *AxispointChaincode) initFunctionMaps() {
 	t.funcMap["addIpiOrg"] = addIpiOrg
 	t.funcMap["updateIpiOrg"] = updateIpiOrg
 	t.funcMap["getIpiOrgByUUID"] = getIpiOrgByUUID
+	t.funcMap["getAllIpiOrgs"] = getAllIpiOrgs
 	t.funcMap["deleteIpiOrgByUUID"] = deleteIpiOrgByUUID
 	t.funcMap["generateCollectionStatement"] = generateCollectionStatement
 	t.funcMap["addRoyaltyStatementAndEvent"] = addRoyaltyStatementAndEvent

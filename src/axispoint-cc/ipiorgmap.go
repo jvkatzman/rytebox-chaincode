@@ -2,10 +2,13 @@ package main
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
+
+var getIpiOrgForQueryString = getObjectByQueryFromLedger
 
 /*
 * addIpiOrg function inserts a mapping between IPI and Org to the Ledger
@@ -120,6 +123,51 @@ func getIpiOrgByUUID(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	logger.Info("ENTERING >", methodName, args)
 	return getAssetByUUID(stub, args)
 
+}
+
+//getAllIpiOrgs: get all the ipi-org mappings that exist
+func getAllIpiOrgs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var methodName = "getAllIpiOrgs"
+	logger.Infof("%s - Begin Execution ", methodName)
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"%s\"}}", IPIORGMAP)
+
+	resultIpiOrgs, err := queryIpiOrgs(stub, queryString)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+
+	queryResultBytes, err := objectToJSON(resultIpiOrgs)
+	if err != nil {
+		return getErrorResponse(err.Error())
+	}
+	logger.Info("result(s) received from couch db: %s", string(queryResultBytes))
+
+	//return bytes as result
+	return shim.Success(queryResultBytes)
+}
+
+//queryIpiOrgs: query ipi-org mappings by rich query
+func queryIpiOrgs(stub shim.ChaincodeStubInterface, queryString string) ([]IpiOrgMap, error) {
+	var methodName = "queryIpiOrgs"
+	logger.Infof("%s - Begin Execution ", methodName)
+	defer logger.Infof("%s - End Execution ", methodName)
+
+	logger.Info("%s - executing rich query : %s.", methodName, queryString)
+
+	queryResult, err := getIpiOrgForQueryString(stub, queryString)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	var resultIpiOrgs []IpiOrgMap
+	err = sliceToStruct(queryResult, &resultIpiOrgs)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	return resultIpiOrgs, nil
 }
 
 //deleteIpiOrgByUUID function retrieves IPI-Org Mappings by IPI (UUID of a participant)
