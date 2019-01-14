@@ -146,43 +146,6 @@ func Test_DeleteCollectionRightReportByIDs(t *testing.T) {
 	}
 }
 
-/*
-//test - updateCopyrightDataReport
-func Test_updateCopyrightDataReportByIDs(t *testing.T) {
-
-	scc := new(AxispointChaincode)
-	stub := shim.NewMockStub("AxispointChaincode", scc)
-
-	// Init
-	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
-
-	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
-	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(copyrightDataReportSingleInput)})
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	_, err = checkInvoke(t, stub, [][]byte{[]byte("updateCopyrightDataReports"), []byte(updatedCopyrightDateReportSingleInput)})
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	getCopyrightDataReportForQueryString = MockGetUpdatedCopyrightDataReport
-	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByID"), []byte(copyrightDataReportUUID)})
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	expectedReports, err := MockGetUpdatedCopyrightDataReport(stub, "")
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-	//normalize []string to string
-	if !reflect.DeepEqual(expectedReports[0], string(actualReport)) {
-		t.Fatalf("Actual response is not equal to expected response")
-	}
-}*/
-
 func Test_updateCollectionRightReports_Single(t *testing.T) {
 	scc := new(AxispointChaincode)
 	stub := shim.NewMockStub("AxispointChaincode", scc)
