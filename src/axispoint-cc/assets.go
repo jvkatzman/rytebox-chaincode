@@ -109,22 +109,12 @@ type RightHolder struct {
 type CollectionRight struct {
 	DocType             string        `json:"docType"`
 	CollectionRightUUID string        `json:"collectionRightUUID"`
-	From                string        `json:"from"`     //EMI, Freddy, owner or admin.. --- also the key
-	FromName            string        `json:"fromName"` //for display puposes
+	From                string        `json:"from"`
+	FromName            string        `json:"fromName"`
 	StartDate           string        `json:"startDate"`
 	EndDate             string        `json:"endDate"`
 	RightHolders        []RightHolder `json:"rightHolders"`
 }
-
-//need to coordinate with MATT
-//instead of managing
-//ownershipAdministration
-//AdministratorAffiliation
-
-//rules need to move to collection rights
-//they need to describe commission and generation
-//generate as many files for 'EMI' to their partners
-//depicts privacy at a high level
 
 //RoyaltyStatementCreationEventPayload payload to passed as part of the event.
 type RoyaltyStatementCreationEventPayload struct {
