@@ -13,6 +13,7 @@ var collectionRightReportMultipleInput = `[{"docType":"COLLECTIONRIGHTREPORT","c
 var collectionRightReportSingleOutput1 = `{"docType":"COLLECTIONRIGHTREPORT","collectionRightUUID":"15094dbb-9853-4737-aaa6-544ed27e0ac1","from":"PU200004","fromName":"MARS FORCE MUSIC","startDate":"2010-12-1","endDate":"2030-12-1","rightHolders":[{"selector":"Territory=\"GER\"","ipi":"PG100001","percent":100},{"selector":"Territory=\"USA\"","ipi":"PU200001","percent":100},{"selector":"Territory=\"AUS\"","ipi":"PA300001","percent":100}]}`
 var collectionRightReportSingleOutput2 = `{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"2cfbdb47-cca7-3eca-b73e-0d6c478a6abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"selector":"slct1","ipi":"ipi1","percent":42},{"selector":"slct2","ipi":"ipi2","percent":33}]}`
 var updatedCollectionRightReportSingleInput = `[{"docType":"COLLECTIONRIGHTREPORT","collectionRightUUID":"15094dbb-9853-4737-aaa6-544ed27e0ac1","from":"PU200004","fromName":"MARS FORCE MUSIC - updated","startDate":"2010-12-1","endDate":"2030-12-1","rightHolders":[{"selector":"Territory=\"GER\"","ipi":"PG100001","percent":100},{"selector":"Territory=\"USA\"","ipi":"PU200001","percent":100},{"selector":"Territory=\"AUS\"","ipi":"PA300001","percent":100}]}]`
+var updatedCollectionRightReportSingleOutput = `{"docType":"COLLECTIONRIGHTREPORT","collectionRightUUID":"15094dbb-9853-4737-aaa6-544ed27e0ac1","from":"PU200004","fromName":"MARS FORCE MUSIC - updated","startDate":"2010-12-1","endDate":"2030-12-1","rightHolders":[{"selector":"Territory=\"GER\"","ipi":"PG100001","percent":100},{"selector":"Territory=\"USA\"","ipi":"PU200001","percent":100},{"selector":"Territory=\"AUS\"","ipi":"PA300001","percent":100}]}`
 
 var collectionRightReportMultipleOutput1 = `{"docType":"COLLECTIONRIGHTREPORT","collectionRightUUID":"15094dbb-9853-4737-aaa6-544ed27e0ac1","from":"PU200004","fromName":"MARS FORCE MUSIC","startDate":"2010-12-1","endDate":"2030-12-1","rightHolders":[{"selector":"Territory=\"GER\"","ipi":"PG100001","percent":100},{"selector":"Territory=\"USA\"","ipi":"PU200001","percent":100},{"selector":"Territory=\"AUS\"","ipi":"PA300001","percent":100}]}`
 var collectionRightReportMultipleOutput2 = `{"docType":"COLLECTIONRIGHTREPORT","collectionRightUUID":"04240be9-73d3-4227-88a1-31c52d4db3bc","from":"PA300002","fromName":"URBAN SONGS","startDate":"2010-12-1","endDate":"2030-12-1","rightHolders":[{"selector":"Territory=\"GER\"","ipi":"PG100001","percent":100},{"selector":"Territory=\"USA\"","ipi":"PU200001","percent":100},{"selector":"Territory=\"AUS\"","ipi":"PA300001","percent":100}]}`
@@ -29,7 +30,7 @@ func MockGetCollectionRightReportResponse(functionName string) []byte {
 }
 
 func MockGetCollectionRightReport(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
-	return []string{`{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","isrc":"123Src","songTitle":"NY NY","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"selector":"slct1","ipi":"ipi1","percent":42},{"selector":"slct2","ipi":"ipi2","percent":33}]}`}, nil
+	return []string{`{"docType":"COLLECTIONRIGHTREPORT","collectionRightUUID":"15094dbb-9853-4737-aaa6-544ed27e0ac1","from":"PU200004","fromName":"MARS FORCE MUSIC","startDate":"2010-12-1","endDate":"2030-12-1","rightHolders":[{"selector":"Territory=\"GER\"","ipi":"PG100001","percent":100},{"selector":"Territory=\"USA\"","ipi":"PU200001","percent":100},{"selector":"Territory=\"AUS\"","ipi":"PA300001","percent":100}]}`}, nil
 }
 func MockGetUpdatedCollectionRightReport(stub shim.ChaincodeStubInterface, queryString string) ([]string, error) {
 	return []string{`{"docType":"COPYRIGHTDATAREPORT","copyrightDataReportUUID":"1cfbdb47-cca7-3eca-b73e-0d6c478a5abc","isrc":"1234567Src","songTitle":"modified","startDate":"2018-01-01T21:17:34.371Z","endDate":"2018-11-15T22:27:34.111Z","rightHolders":[{"selector":"slct1","ipi":"ipi1","percent":42},{"selector":"slct2","ipi":"ipi2","percent":33}]}`}, nil
@@ -42,7 +43,7 @@ func Test_AddCollectionRightReports_Single(t *testing.T) {
 	// Init
 	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
 
-	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
+	getCollectionRightsForQueryString = MockGetCollectionRightReport
 	actual, err := checkInvoke(t, stub, [][]byte{[]byte("addCollectionRights"), []byte(collectionRightReportSingleInput)})
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -88,8 +89,7 @@ func Test_AddCollectionRightReport_Multiple(t *testing.T) {
 	}
 }
 
-/*
-func Test_GetCopyrightDataReportByID(t *testing.T) {
+func Test_GetCollectionRightReportByID(t *testing.T) {
 
 	scc := new(AxispointChaincode)
 	stub := shim.NewMockStub("AxispointChaincode", scc)
@@ -97,19 +97,18 @@ func Test_GetCopyrightDataReportByID(t *testing.T) {
 	// Init
 	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
 
-	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
 	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCollectionRights"), []byte(collectionRightReportSingleInput)})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
-	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByID"), []byte(collectionRightReportUUID)})
+	collectionRightReportUUID = "15094dbb-9853-4737-aaa6-544ed27e0ac1"
+	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getAssetByUUID"), []byte(collectionRightReportUUID)})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
-	expectedReports, err := MockGetCopyrightDataReport(stub, "")
+	expectedReports, err := MockGetCollectionRightReport(stub, "")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -117,7 +116,7 @@ func Test_GetCopyrightDataReportByID(t *testing.T) {
 	if !reflect.DeepEqual(expectedReports[0], string(actualReport)) {
 		t.Fatalf("Actual response is not equal to expected response")
 	}
-}*/
+}
 
 //Test_deleteCopyrightDataReportByIDs
 func Test_DeleteCollectionRightReportByIDs(t *testing.T) {
@@ -128,7 +127,7 @@ func Test_DeleteCollectionRightReportByIDs(t *testing.T) {
 	// Init
 	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
 
-	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
+	getCollectionRightsForQueryString = MockGetCollectionRightReport
 	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCollectionRights"), []byte(collectionRightReportSingleInput)})
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -147,43 +146,6 @@ func Test_DeleteCollectionRightReportByIDs(t *testing.T) {
 	}
 }
 
-/*
-//test - updateCopyrightDataReport
-func Test_updateCopyrightDataReportByIDs(t *testing.T) {
-
-	scc := new(AxispointChaincode)
-	stub := shim.NewMockStub("AxispointChaincode", scc)
-
-	// Init
-	checkInit(t, stub, [][]byte{[]byte("init"), []byte("")}, nil)
-
-	getCopyrightDataReportForQueryString = MockGetCopyrightDataReport
-	_, err := checkInvoke(t, stub, [][]byte{[]byte("addCopyrightDataReports"), []byte(copyrightDataReportSingleInput)})
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	_, err = checkInvoke(t, stub, [][]byte{[]byte("updateCopyrightDataReports"), []byte(updatedCopyrightDateReportSingleInput)})
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	getCopyrightDataReportForQueryString = MockGetUpdatedCopyrightDataReport
-	actualReport, err := checkInvoke(t, stub, [][]byte{[]byte("getCopyrightDataReportByID"), []byte(copyrightDataReportUUID)})
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	expectedReports, err := MockGetUpdatedCopyrightDataReport(stub, "")
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-	//normalize []string to string
-	if !reflect.DeepEqual(expectedReports[0], string(actualReport)) {
-		t.Fatalf("Actual response is not equal to expected response")
-	}
-}*/
-
 func Test_updateCollectionRightReports_Single(t *testing.T) {
 	scc := new(AxispointChaincode)
 	stub := shim.NewMockStub("AxispointChaincode", scc)
@@ -196,18 +158,19 @@ func Test_updateCollectionRightReports_Single(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	_, err = checkInvoke(t, stub, [][]byte{[]byte("updateCollectionRights"), []byte(updatedCollectionRightReportSingleInput)})
+	actual, err := checkInvoke(t, stub, [][]byte{[]byte("updateCollectionRights"), []byte(updatedCollectionRightReportSingleInput)})
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	// Check State for Transaction
-	//checkState(t, stub, collectionRightReportUUID, updatedCollectionRightReportSingleInput)
+	collectionRightReportUUID = "15094dbb-9853-4737-aaa6-544ed27e0ac1"
+	checkState(t, stub, collectionRightReportUUID, updatedCollectionRightReportSingleOutput)
 
-	// expected := MockGetCopyrightDataReportResponse("Test_AddCopyrightDataReports_Single")
-	// if !reflect.DeepEqual(expected, actual) {
-	// 	t.Fatalf("Actual response is not equal to expected response")
-	// }
+	expected := MockGetCollectionRightReportResponse("Test_AddCollectionRightReports_Single")
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("Actual response is not equal to expected response")
+	}
 }
 
 //Test the Edge cases
