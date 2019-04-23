@@ -1,0 +1,12 @@
+# Copyright IBM Corporation. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+services:
+    mongodb:
+        image: mongo:latest
+        container_name: "keyvalstoredb"
+        ports:
+            - 37017:27017

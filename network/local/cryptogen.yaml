@@ -1,0 +1,54 @@
+# Copyright IBM Corporation. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+#  Author: Sandeep Pulluru <sandeep.pulluru@ibm.com>
+
+# ---------------------------------------------------------------------------
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+# ---------------------------------------------------------------------------
+OrdererOrgs:
+  - Name: Orderer
+    Domain: example.com
+    CA:
+        Country: US
+        Province: California
+        Locality: San Francisco
+    Specs:
+      - Hostname: orderer
+    Template:
+      Count: 1
+# ---------------------------------------------------------------------------
+# "PeerOrgs" - Definition of organizations managing peer nodes
+# ---------------------------------------------------------------------------
+PeerOrgs:
+  # ---------------------------------------------------------------------------
+  # Org1
+  # ---------------------------------------------------------------------------
+  - Name: Org1
+    Domain: org1.example.com
+    EnableNodeOUs: true
+    CA:
+        Country: US
+        Province: California
+        Locality: San Francisco
+    Template:
+      Count: 1
+      # Start: 5
+      # Hostname: {{.Prefix}}{{.Index}} # default
+    Users:
+      Count: 1
+  # ---------------------------------------------------------------------------
+  # Org2
+  # ---------------------------------------------------------------------------
+  - Name: Org2
+    Domain: org2.example.com
+    EnableNodeOUs: true
+    CA:
+        Country: US
+        Province: California
+        Locality: San Francisco
+    Template:
+      Count: 1
+    Users:
+      Count: 1

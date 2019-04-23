@@ -1,0 +1,13 @@
+{
+    "name": "Production Network Org1",
+    "x-type": "hlfv1",
+    "description": "Connection Profile for an IBM Blockchain Platform Network",
+    "version": "1.0.2",
+    "client": {
+        "organization": "org1",
+        "crypto-keysize": 256,
+        "key-value-store-impl": "../../fabric-helper/lib/impl/MongoDBKeyValueStore.js",
+        "key-value-store-name": "org1-key-value-store",
+        "key-value-store-db": "mongodb://admin:XFOIHPHMPWQVWGIM@sl-us-south-1-portal.42.dblayer.com:15124,sl-us-south-1-portal.43.dblayer.com:15124/compose?authSource=admin&ssl=true"
+    }
+}

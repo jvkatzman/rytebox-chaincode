@@ -1,0 +1,53 @@
+{
+  "name": "axispoint-rest-api",
+  "description": "Blockchain Rest API on the Bluemix platform",
+  "version": "1.0.0",
+  "private": false,
+  "scripts": {
+    "creator-test": "node creator/test/jasmine-runner.js",
+    "ingestion-test": "node ingestion/test/jasmine-runner.js",
+    "creator": "cd creator && node app.js",
+    "ingestion": "cd ingestion && node app.js"
+  },
+  "engines": {
+    "node": "8.x",
+    "npm": "5.x"
+  },
+  "devDependencies": {
+    "jasmine": "^3.1.0",
+    "jasmine-console-reporter": "^3.1.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "bn.js": "^4.11.6",
+    "body-parser": "^1.17.1",
+    "bunyan": "^1.8.1",
+    "busboy": "^0.2.14",
+    "cfenv": "^1.0.x",
+    "config": "^1.29.2",
+    "cors": "^2.8.3",
+    "express": "^4.15.2",
+    "express-bearer-token": "^2.1.0",
+    "express-busboy": "^7.0.0",
+    "express-fileupload": "^1.0.0",
+    "express-jwt": "^5.3.0",
+    "fabric-ca-client": "~1.2.0",
+    "fabric-client": "~1.2.0",
+    "fs-extra": "^7.0.0",
+    "grpc": "1.10.1",
+    "joi": "^14.0.6",
+    "jsonwebtoken": "^8.1.0",
+    "log4js": "^1.1.0",
+    "mongodb": "^2.2.33",
+    "multer": "^1.4.1",
+    "node-uuid": "1.4.8",
+    "promise": "^7.1.1",
+    "request": "2.83.0",
+    "swagger-ui-express": "^4.0.1",
+    "uuid": "^3.3.2",
+    "yamljs": "^0.3.0",
+    "yargs": "^10.0.3"
+  },
+  "author": "IBM Corp.",
+  "license": "Apache-2.0"
+}

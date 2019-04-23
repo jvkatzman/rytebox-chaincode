@@ -1,0 +1,6 @@
+{
+    "channelConfigPath": "../../network/local/channel/defaultchannel.tx",
+    "eventWaitTime": 600000,
+    "loglevel": "INFO",
+    "chaincodePath": "../../../whitebox-chaincode"
+}
