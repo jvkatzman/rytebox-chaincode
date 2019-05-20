@@ -15,18 +15,18 @@
                 "orderer"
             ],
             "peers": {
-                "org2-peer1": {
-                    "endorsingPeer": true,
-                    "chaincodeQuery": true,
-                    "ledgerQuery": true,
-                    "eventSource": true,
-                    "x-chaincode": {}
-                },
-                "org1-peer1": {
+                "org2-peer0": {
                     "endorsingPeer": true,
                     "chaincodeQuery": false,
                     "ledgerQuery": false,
                     "eventSource": false,
+                    "x-chaincode": {}
+                },
+                "org1-peer0": {
+                    "endorsingPeer": true,
+                    "chaincodeQuery": true,
+                    "ledgerQuery": true,
+                    "eventSource": true,
                     "x-chaincode": {}
                 }
             },
@@ -41,7 +41,7 @@
         "org2": {
             "mspid": "Org2MSP",
             "peers": [
-                "org2-peer1"
+                "org2-peer0"
             ],
             "certificateAuthorities": [
                 "org2-ca"
@@ -65,7 +65,8 @@
                 "grpc.keepalive_time_ms": 360000,
                 "grpc.http2.keepalive_timeout": 180,
                 "grpc.keepalive_timeout_ms": 180000,
-                "ssl-target-name-override": "orderer.example.com"
+                "ssl-target-name-override": "orderer.example.com",
+                "hostnameOverride": "orderer.example.com"
             },
             "tlsCACerts": {
                 "path": "../network/local/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt"
@@ -73,7 +74,7 @@
         }
     },
     "peers": {
-        "org1-peer1": {
+        "org1-peer0": {
             "url": "grpcs://localhost:7051",
             "eventUrl": "grpcs://localhost:7053",
             "grpcOptions": {
@@ -81,7 +82,8 @@
                 "grpc.keepalive_time_ms": 360000,
                 "grpc.http2.keepalive_timeout": 180,
                 "grpc.keepalive_timeout_ms": 180000,
-                "ssl-target-name-override": "peer0.org1.example.com"
+                "ssl-target-name-override": "peer0.org1.example.com",
+                "hostnameOverride": "peer0.org1.example.com"
             },
             "tlsCACerts": {
                 "path": "../network/local/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
@@ -90,7 +92,7 @@
             "x-ledgerDbType": "couch",
             "x-installed-chaincode": {}
         },
-        "org2-peer1": {
+        "org2-peer0": {
             "url": "grpcs://localhost:9051",
             "eventUrl": "grpcs://localhost:9053",
             "grpcOptions": {
@@ -98,7 +100,8 @@
                 "grpc.keepalive_time_ms": 360000,
                 "grpc.http2.keepalive_timeout": 180,
                 "grpc.keepalive_timeout_ms": 180000,
-                "ssl-target-name-override": "peer0.org2.example.com"
+                "ssl-target-name-override": "peer0.org2.example.com",
+                "hostnameOverride": "peer0.org2.example.com"
             },
             "tlsCACerts": {
                 "path": "../network/local/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt"
