@@ -80,9 +80,9 @@ COMPOSE_FILE=./docker-compose.yaml
 COMPOSE_FILE_WITH_COUCH=./docker-compose-couch.yaml
 COMPOSE_FILE_KEYVAL=./docker-compose-keyval.yaml
 function dkcl() {
-	CONTAINERS=$(docker ps -a | wc -l)
+	CONTAINERS=$(docker ps -a --filter network=local_default | wc -l)
 	if [ "$CONTAINERS" -gt "1" ]; then
-		docker rm -f $(docker ps -aq)
+		docker rm -f $(docker ps -aq --filter network=local_default)
 	else
 		printf "\n========== No containers available for deletion ==========\n"
 	fi
